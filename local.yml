@@ -1,0 +1,38 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./compose/local/Dockerfile
+    image: consultapixccs_local_app
+    ports:
+      - '3000:3000'
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - usernameBC=${usernameBC}
+      - passwordBC=${passwordBC}
+    depends_on:
+      - postgres
+
+  postgres:
+    build:
+      context: .
+      dockerfile: ./compose/production/postgres/Dockerfile
+    image: consultapixccs_production_postgres
+    volumes:
+      - consultapixccs_postgres_data:/var/lib/postgresql/data
+      - consultapixccs_postgres_data_backups:/backups
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+
+volumes:
+  consultapixccs_postgres_data: {}
+  consultapixccs_postgres_data_backups: {}

@@ -17,26 +17,24 @@ async function setupDatabase() {
     if (!existingAdmin) {
       console.log('Criando o usuário admin padrão...');
 
-      const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-      });
+      // const rl = readline.createInterface({
+      //   input: process.stdin,
+      //   output: process.stdout
+      // });
 
-      rl.question('Digite a senha para o usuário admin: ', async (password) => {
-        let hashedPassword = await hash(password, 10); // Hash the password
-        await prisma.usuario.create({
-          data: {
-            nome: 'Admin',
-            cpf: '12345678900',
-            email: 'admin@admin.com',
-            password: hashedPassword,
-            admin: true
-          }
-        });
-        console.log('Usuário admin padrão criado com sucesso.');
-        rl.close();
-        await prisma.$disconnect();
+      const password = "changeme"; // Default password
+      const hashedPassword = await hash(password, 10); // Hash the password
+      await prisma.usuario.create({
+        data: {
+          nome: 'Admin',
+          cpf: '12345678900',
+          email: 'admin@admin.com',
+          password: hashedPassword,
+          admin: true
+        }
       });
+      console.log('Usuário admin padrão criado com sucesso.');
+      await prisma.$disconnect();
     } else {
       console.log('O usuário admin padrão já existe.');
       await prisma.$disconnect();
@@ -51,8 +49,8 @@ async function setupDatabase() {
 
 async function main() {
   try {
-    console.log('Instalando as dependências do aplicativo...');
-    execSync('npm install', { stdio: 'inherit' });
+    // console.log('Instalando as dependências do aplicativo...');
+    // execSync('npm install', { stdio: 'inherit' });
 
     console.log('Criando o banco de dados...');
     await generatePrismaClient();
