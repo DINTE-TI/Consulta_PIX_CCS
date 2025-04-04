@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import axios from "axios";
 import xml2js from "xml2js";
-import { prisma } from "@/src/lib/prisma";
-import { verifyJwtToken } from "@/src/app/auth/validateToken";
+import { prisma } from "/src/lib/prisma";
+import { verifyJwtToken } from "/src/app/auth/validateToken";
 
 export async function GET(request) {
   let lista = [];

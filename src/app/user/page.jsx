@@ -12,7 +12,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Button from '@mui/material/Button';
 import Link from 'next/link';
 import USERRow from './components/USERRow';
-import withAuth from '@/src/app/auth/withAuth';
+import withAuth from '/src/app/auth/withAuth';
 
 
 const DashUser = () => {

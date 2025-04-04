@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Context } from '@/src/app/context';
+import { Context } from '/src/app/context';
 import { TextField, Checkbox, FormControlLabel, Button, Box, IconButton, Grid } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';

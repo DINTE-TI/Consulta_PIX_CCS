@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/src/lib/prisma";
+import { prisma } from "/src/lib/prisma";
 import bcrypt from 'bcrypt';
 import { SignJWT, base64url } from "jose";
 

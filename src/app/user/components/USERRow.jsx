@@ -17,7 +17,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import { pink } from '@mui/material/colors';
 import { Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, Select, MenuItem, Box, DialogContentText } from '@mui/material';
 import axios from 'axios';
-import withAuth from '@/src/app/auth/withAuth';
+import withAuth from '/src/app/auth/withAuth';
 import { v4 as uuidv4 } from 'uuid';
 
 const USERRow = (props) => {

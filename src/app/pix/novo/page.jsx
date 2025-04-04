@@ -31,11 +31,11 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import { useSearchParams } from 'next/navigation'
-import DialogRelatorioPIX from '@/src/app/pix/components/Relatorios/ExportaRelatorioPIX';
+import DialogRelatorioPIX from '/src/app/pix/components/Relatorios/ExportaRelatorioPIX';
 import DialogRequisicoesPIX from '../components/DialogRequisicoesPIX';
-import { Context } from '@/src/app/context';
+import { Context } from '/src/app/context';
 import { v4 as uuidv4 } from "uuid";
-import withAuth from '@/src/app/auth/withAuth';
+import withAuth from '/src/app/auth/withAuth';
 
 const ConsultaPix = () => {
 

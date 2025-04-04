@@ -19,8 +19,8 @@ import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } 
 import * as React from "react";
 import axios from "axios";
 import DialogRelacionamentoCCS from "../components/DialogRelacionamentoCCS";
-import DialogDetalhamentoCCS from "@/src/app/ccs/components/DialogDetalhamentoCCS";
-import { Context } from "@/src/app/context";
+import DialogDetalhamentoCCS from "/src/app/ccs/components/DialogDetalhamentoCCS";
+import { Context } from "/src/app/context";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -29,7 +29,7 @@ import 'dayjs/locale/en-gb';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import { v4 as uuidv4 } from "uuid";
-import withAuth from '@/src/app/auth/withAuth';
+import withAuth from '/src/app/auth/withAuth';
 import DialogExportaRelacionamentosCCS from "../components/Relatorios/ExportaRelacionamentosCCS";
 
 const ConsultaCCS = () => {

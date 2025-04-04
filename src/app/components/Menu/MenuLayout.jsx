@@ -1,7 +1,7 @@
 import Menu from './Menu'
 import { Box } from '@mui/material'
 import { MenuProvider } from './menuContext'
-import withAuth from '@/src/app/auth/withAuth';
+import withAuth from '/src/app/auth/withAuth';
 
 function Layout ({ children }) {
 

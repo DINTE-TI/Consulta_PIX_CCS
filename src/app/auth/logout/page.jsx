@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import * as React from 'react';
-import { Context } from '@/src/app/context';
+import { Context } from '/src/app/context';
 
 const LogoutPage = () => {
     const router = useRouter();

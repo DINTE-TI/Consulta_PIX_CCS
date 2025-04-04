@@ -10,7 +10,7 @@ import LayersIcon from '@mui/icons-material/Layers';
 import LogoutIcon from '@mui/icons-material/Logout';
 import Person from '@mui/icons-material/Person';
 import Link from 'next/link';
-import { Context } from '@/src/app/context';
+import { Context } from '/src/app/context';
 
 export const MainListItems = () => {
 

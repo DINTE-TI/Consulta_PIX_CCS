@@ -3,6 +3,9 @@ FROM node:lts-slim AS base
 # Rebuild the source code only when needed
 FROM base AS builder
 
+RUN apt-get update
+RUN apt-get install -y openssl
+
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
@@ -15,10 +18,14 @@ ENV NEXT_TELEMETRY_DISABLED 1
 
 # RUN npx prisma generate --schema ./prisma/schema.prisma
 
+COPY prisma/ ./prisma
 COPY public/ ./public
-COPY app/ ./app
-COPY lib/ ./lib
-COPY next.config.mjs ./
+COPY src/ ./src
+COPY next.config.js ./
+COPY .env ./env
+
+RUN npx prisma generate --schema ./prisma/schema.prisma
+
 RUN npm run build
 
 
@@ -31,14 +38,14 @@ RUN apt-get install -y openssl
 WORKDIR /app
 
 ENV NODE_ENV production
-# Uncomment the following line in case you want to disable telemetry during runtime.
-# ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED 1
+ENV PORT 3000
+ENV HOSTNAME=0.0.0.0
+ENV CHECKPOINT_DISABLE=1
+ENV DISABLE_PRISMA_TELEMETRY=true
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
-
-COPY --from=builder /app/public ./public
-# COPY --from=builder /app/package.json ./package.json
 
 # Set the correct permission for prerender cache
 RUN mkdir .next
@@ -48,14 +55,16 @@ RUN chown nextjs:nodejs .next
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-# COPY --chown=nextjs:nodejs prisma ./prisma/
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+
+RUN npm install --global --save-exact "prisma@$(node --print 'require("./node_modules/@prisma/client/package.json").version')"
+
+COPY start.sh /usr/local/bin
 
 USER nextjs
 
 EXPOSE 3000
 
-ENV PORT 3000
-
-# server.js is created by next build from the standalone output
-# https://nextjs.org/docs/pages/api-reference/next-config-js/output
+# ENTRYPOINT [ "/start.sh" ]
 CMD HOST="0.0.0.0" node server.js

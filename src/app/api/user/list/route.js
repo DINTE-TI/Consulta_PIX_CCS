@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/src/lib/prisma";
+import { prisma } from "/src/lib/prisma";
 import { hash } from 'bcrypt';
-import { verifyJwtToken } from "@/src/app/auth/validateToken";
+import { verifyJwtToken } from "/src/app/auth/validateToken";
 
 export async function GET(request) {
     const { searchParams } = new URL(request.url);
