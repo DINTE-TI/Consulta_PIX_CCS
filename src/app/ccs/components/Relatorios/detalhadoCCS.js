@@ -320,7 +320,7 @@ export default async function RelatorioDetalhadoCCS(requisicoes) {
                             { image: Logo_LAB, alignment: 'center', width: 150 },
                             {
                                 text: [
-                                    { text: 'POLÍCIA CIVIL DE SANTA CATARINA\nDIRETORIA ESTADUAL DE INVESTIGAÇÃO CRIMINAL\nLABORATÓRIO DE TECNOLOGIA CONTRA LAVAGEM DE DINHEIRO\n\n', alignment: 'center', fontSize: 10 },
+                                    { text: 'POLÍCIA CIVIL DO PIAUÍ\nDIRETORIA DE INTELIGÊNCIA DA POLÍCIA CIVIL - DIPC\nLABORATÓRIO DE TECNOLOGIA CONTRA LAVAGEM DE DINHEIRO\n\n', alignment: 'center', fontSize: 10 },
                                     { text: 'REQUISIÇÕES CCS - DETALHADA', alignment: 'center', fontSize: 10, bold: true },
                                 ]
                             },
