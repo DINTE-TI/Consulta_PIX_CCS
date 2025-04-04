@@ -1,5 +1,5 @@
 services:
-  app:
+  nextjs:
     build:
       context: .
       dockerfile: ./compose/local/Dockerfile
