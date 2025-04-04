@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: ./compose/production/next/Dockerfile
-    image: production_consultapixccs
+    image: consultapixccs_production_app
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - usernameBC=${usernameBC}
