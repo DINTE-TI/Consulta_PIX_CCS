@@ -38,14 +38,14 @@ export const MainListItems = () => {
         </ListItemIcon>
         <ListItemText primary="PIX" />
       </ListItem>
-      <ListItem button component={Link} href="/ccs"
+      {/* <ListItem button component={Link} href="/ccs"
         selected={selectedIndex === 2}
         onClick={(event) => handleListItemClick(event, 2)}>
         <ListItemIcon>
           <BarChartIcon />
         </ListItemIcon>
         <ListItemText primary="CCS" />
-      </ListItem>
+      </ListItem> */}
     </div >
   )
 };

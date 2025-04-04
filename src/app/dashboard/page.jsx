@@ -45,7 +45,7 @@ const Dashboard = () => {
 
     return (
         <Box style={{display: 'flex'}}>
-            <Box width='300px' padding='20px'>
+            {/* <Box width='300px' padding='20px'>
                 <Card sx={{ minWidth: 275, minHeight: 200 }}>
                     <CardActionArea component={Link} href="/caso/novo">
                         <CardContent sx={{ minWidth: 275, minHeight: 200 }}>
@@ -58,7 +58,7 @@ const Dashboard = () => {
                         </CardContent>
                     </CardActionArea>
                 </Card>
-            </Box>
+            </Box> */}
             <Box width='300px' padding='20px'>
                 <Card sx={{ minWidth: 275, minHeight: 200 }}>
                     <CardActionArea  component={Link} href="/pix">
@@ -73,7 +73,7 @@ const Dashboard = () => {
                     </CardActionArea>
                 </Card>
             </Box>
-            <Box width='300px' padding='20px'>
+            {/* <Box width='300px' padding='20px'>
                 <Card sx={{ minWidth: 275, minHeight: 200 }}>
                     <CardActionArea  component={Link} href="/ccs">
                         <CardContent sx={{ minWidth: 275, minHeight: 200 }}>
@@ -86,7 +86,7 @@ const Dashboard = () => {
                         </CardContent>
                     </CardActionArea>
                 </Card>
-            </Box>
+            </Box> */}
         </Box>
     )
 }
