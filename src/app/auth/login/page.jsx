@@ -123,7 +123,9 @@ const LoginPage = () => {
             style={{ alignSelf:'center', margin:'10px' }}
             height={20}
             width={20} />
-          <Typography component="p" sx={{ color: 'text.secondary', fontWeight: 300, fontSize: 12 }}>
+          <Typography
+            component="p"
+            sx={{ color: '#1a5475', fontWeight: 600, fontSize: 12 }}>
             PCPI/DIPC/LAB-LD
           </Typography>
         </Box>
