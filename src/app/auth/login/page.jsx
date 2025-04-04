@@ -51,8 +51,8 @@ const LoginPage = () => {
   return (
     <Box
       sx={{
-        height: '100vh',
-        width: '100vw',
+        height: '95vh',
+        width: '95vw',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
