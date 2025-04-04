@@ -1,3 +1,8 @@
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  output: 'standalone',
+};
+
 const cspHeader = `
     default-src 'self';
     script-src 'self' 'unsafe-eval' 'unsafe-inline';
@@ -10,7 +15,7 @@ const cspHeader = `
     frame-ancestors 'none';
     upgrade-insecure-requests;
 `;
- 
+
 module.exports = {
   reactStrictMode: false,
   async headers() {
@@ -27,3 +32,5 @@ module.exports = {
     ];
   },
 };
+
+module.exports = nextConfig;
