@@ -1,5 +1,6 @@
 'use client'
 
+import { Login } from '@mui/icons-material';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
@@ -11,14 +12,14 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import * as React from 'react';
 import { Context } from '../../context';
-
+import { GeistSans } from 'geist/font/sans';
 const LoginPage = () => {
 
   const router = useRouter();
 
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
-  const { state, dispatch } = React.useContext(Context);
+  const { dispatch } = React.useContext(Context);
 
   const onLoginPressed = async () => {
     const authData = {
@@ -58,6 +59,7 @@ const LoginPage = () => {
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'hidden',
+        fontFamily: `${GeistSans.className}`,
       }}
     >
       <Box
@@ -112,6 +114,8 @@ const LoginPage = () => {
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
+            size="small"
+            startIcon={<Login />}
           >
             Entrar
           </Button>
@@ -120,12 +124,14 @@ const LoginPage = () => {
           <Image
             src={'/logo_Lab_sm.png'}
             alt='Logo_Lab_sm'
-            style={{ alignSelf:'center', margin:'10px' }}
+            style={{ alignSelf: 'center', margin: '10px' }}
             height={20}
             width={20} />
           <Typography
             component="p"
-            sx={{ color: '#1a5475', fontWeight: 600, fontSize: 12 }}>
+            color={'textSecondary'}
+            sx={{ fontWeight: 600, fontSize: 12 }}
+          >
             PCPI/DIPC/LAB-LD
           </Typography>
         </Box>

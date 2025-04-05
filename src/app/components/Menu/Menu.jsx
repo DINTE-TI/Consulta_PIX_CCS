@@ -1,18 +1,17 @@
 'use client'
 
-import * as React from 'react';
-import { MainListItems, SecondaryListItems } from './ItensMenu';
-import { styled, useTheme } from '@mui/material/styles';
-import MuiDrawer from '@mui/material/Drawer';
-import MuiAppBar from '@mui/material/AppBar';
-import List from '@mui/material/List';
-import CssBaseline from '@mui/material/CssBaseline';
-import Divider from '@mui/material/Divider';
-import IconButton from '@mui/material/IconButton';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import { MenuContext, MenuProvider } from './menuContext';
+import MuiAppBar from '@mui/material/AppBar';
+import Divider from '@mui/material/Divider';
+import MuiDrawer from '@mui/material/Drawer';
+import IconButton from '@mui/material/IconButton';
+import List from '@mui/material/List';
+import { styled, useTheme } from '@mui/material/styles';
 import Image from 'next/image';
+import * as React from 'react';
+import { MainListItems, SecondaryListItems } from './ItensMenu';
+import { MenuContext } from './menuContext';
 
 const drawerWidth = 240;
 
@@ -120,8 +119,8 @@ export default function MiniDrawer() {
           </>}
         </DrawerHeader>
         {open ?
-          <Image src={'/Logo_Lab.jpg'} alt='Logo_Lab' style={{ alignSelf:'center', margin:'10px' }} height={78} width={220} /> :
-          <Image src={'/logo_Lab_sm.png'} alt='Logo_Lab_sm' style={{ alignSelf:'center', margin:'10px' }} height={40} width={40} />
+          <Image src={'/Logo_Lab.jpg'} alt='Logo_Lab' style={{ alignSelf: 'center', margin: '10px' }} height={78} width={220} /> :
+          <Image src={'/logo_Lab_sm.png'} alt='Logo_Lab_sm' style={{ alignSelf: 'center', margin: '10px' }} height={40} width={40} />
         }
         <Divider />
         <List><MainListItems /></List>

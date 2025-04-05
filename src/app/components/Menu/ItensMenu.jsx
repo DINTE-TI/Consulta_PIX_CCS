@@ -1,16 +1,18 @@
 'use client'
 
-import * as React from 'react';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import CurrencyExchangeIcon from '@mui/icons-material/CurrencyExchange';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import LogoutIcon from '@mui/icons-material/Logout';
+import Person from '@mui/icons-material/Person';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import LayersIcon from '@mui/icons-material/Layers';
-import LogoutIcon from '@mui/icons-material/Logout';
-import Person from '@mui/icons-material/Person';
 import Link from 'next/link';
+import * as React from 'react';
 import { Context } from '/src/app/context';
+import CustomListItem from './CustomListItem';
+import AddIcon from '@mui/icons-material/Add';
 
 export const MainListItems = () => {
 
@@ -22,30 +24,34 @@ export const MainListItems = () => {
 
   return (
     <div>
-      <ListItem button component={Link} href="/"
+      <CustomListItem
+        href="/caso/novo"
+        text="Visão Geral"
+        icon={<DashboardIcon />}
         selected={selectedIndex === 0}
-        onClick={(event) => handleListItemClick(event, 0)}>
-        <ListItemIcon>
-          <DashboardIcon />
-        </ListItemIcon>
-        <ListItemText primary="Visão Geral" />
-      </ListItem>
-      <ListItem button component={Link} href="/pix"
-        selected={selectedIndex === 1}
-        onClick={(event) => handleListItemClick(event, 1)}>
-        <ListItemIcon>
-          <LayersIcon />
-        </ListItemIcon>
-        <ListItemText primary="PIX" />
-      </ListItem>
-      {/* <ListItem button component={Link} href="/ccs"
+        onClick={(event) => handleListItemClick(event, 0)}
+      />
+      <CustomListItem
+        href="/"
+        text="Novo Caso"
+        icon={<AddIcon />}
+        selected={selectedIndex === 0}
+        onClick={(event) => handleListItemClick(event, 0)}
+      />
+      <CustomListItem
+        href="/pix"
+        text="PIX"
+        icon={<CurrencyExchangeIcon />}
+        selected={selectedIndex === 0}
+        onClick={(event) => handleListItemClick(event, 0)}
+      />
+      <CustomListItem
+        href="/ccs"
+        text="CCS"
+        icon={<AccountBalanceIcon />}
         selected={selectedIndex === 2}
-        onClick={(event) => handleListItemClick(event, 2)}>
-        <ListItemIcon>
-          <BarChartIcon />
-        </ListItemIcon>
-        <ListItemText primary="CCS" />
-      </ListItem> */}
+        onClick={(event) => handleListItemClick(event, 2)}
+      />
     </div >
   )
 };
@@ -76,4 +82,4 @@ export const SecondaryListItems = () => {
       </ListItem>
     </div>
   );
-} 
+}
