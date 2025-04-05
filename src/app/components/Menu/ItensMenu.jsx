@@ -25,30 +25,30 @@ export const MainListItems = () => {
   return (
     <div>
       <CustomListItem
-        href="/caso/novo"
+        href="/"
         text="Visão Geral"
-        icon={<DashboardIcon />}
+        icon={<DashboardIcon style={{ color: "#0a243b" }} />}
         selected={selectedIndex === 0}
         onClick={(event) => handleListItemClick(event, 0)}
       />
       <CustomListItem
-        href="/"
+        href="/caso/novo"
         text="Novo Caso"
-        icon={<AddIcon />}
+        icon={<AddIcon style={{ color: "#0a243b" }} />}
         selected={selectedIndex === 0}
         onClick={(event) => handleListItemClick(event, 0)}
       />
       <CustomListItem
         href="/pix"
         text="PIX"
-        icon={<CurrencyExchangeIcon />}
+        icon={<CurrencyExchangeIcon style={{ color: "#0a243b" }} />}
         selected={selectedIndex === 0}
         onClick={(event) => handleListItemClick(event, 0)}
       />
       <CustomListItem
         href="/ccs"
         text="CCS"
-        icon={<AccountBalanceIcon />}
+        icon={<AccountBalanceIcon style={{ color: "#0a243b" }} />}
         selected={selectedIndex === 2}
         onClick={(event) => handleListItemClick(event, 2)}
       />

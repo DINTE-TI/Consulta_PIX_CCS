@@ -1,13 +1,10 @@
 'use client'
-
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import MuiAppBar from '@mui/material/AppBar';
-import Divider from '@mui/material/Divider';
 import MuiDrawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
 import List from '@mui/material/List';
-import { styled, useTheme } from '@mui/material/styles';
+import { styled } from '@mui/material/styles';
 import Image from 'next/image';
 import * as React from 'react';
 import { MainListItems, SecondaryListItems } from './ItensMenu';
@@ -15,117 +12,85 @@ import { MenuContext } from './menuContext';
 
 const drawerWidth = 240;
 
-const openedMixin = (theme) => ({
-  width: drawerWidth,
-  transition: theme.transitions.create('width', {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.enteringScreen,
-  }),
-  overflowX: 'hidden',
-});
-
-const closedMixin = (theme) => ({
-  transition: theme.transitions.create('width', {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  overflowX: 'hidden',
-  width: `calc(${theme.spacing(7)} + 1px)`,
-  [theme.breakpoints.up('sm')]: {
-    width: `calc(${theme.spacing(8)} + 1px)`,
-  },
-});
-
-const DrawerHeader = styled('div')(({ theme }) => ({
+const LogoContainer = styled('div')({
   display: 'flex',
+  justifyContent: 'center',
   alignItems: 'center',
-  justifyContent: 'flex-end',
-  padding: theme.spacing(0, 1),
-  // necessary for content to be below app bar
-  ...theme.mixins.toolbar,
+  padding: '10px',
+  transition: 'all 0.3s ease'
+});
+
+const ToggleButton = styled(IconButton)(({ theme, open }) => ({
+  width: '100%',
+  display: 'flex',
+  justifyContent: 'center',
+  padding: '10px 0',
+  backgroundColor: '#f5f5f5',
+  borderRadius: 0,
+  '&:hover': {
+    backgroundColor: theme.palette.action.hover,
+  },
+  transition: 'all 0.3s ease',
 }));
 
-const AppBar = styled(MuiAppBar, {
-  shouldForwardProp: (prop) => prop !== 'open',
-})(({ theme, open }) => ({
-  zIndex: theme.zIndex.drawer + 1,
-  transition: theme.transitions.create(['width', 'margin'], {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  ...(open && {
-    marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth}px)`,
-    transition: theme.transitions.create(['width', 'margin'], {
+const DrawerContainer = styled('div')({
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+});
+
+const Drawer = styled(MuiDrawer)(({ theme, open }) => ({
+  width: drawerWidth,
+  flexShrink: 0,
+  whiteSpace: 'nowrap',
+  boxSizing: 'border-box',
+  '& .MuiDrawer-paper': {
+    width: open ? drawerWidth : theme.spacing(7),
+    transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
-  }),
+    overflowX: 'hidden',
+    backgroundColor: theme.palette.background.paper,
+    borderRight: `1px solid ${theme.palette.divider}`,
+  },
 }));
-
-const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
-  ({ theme, open }) => ({
-    width: drawerWidth,
-    flexShrink: 0,
-    whiteSpace: 'nowrap',
-    boxSizing: 'border-box',
-    ...(open && {
-      ...openedMixin(theme),
-      '& .MuiDrawer-paper': openedMixin(theme),
-    }),
-    ...(!open && {
-      ...closedMixin(theme),
-      '& .MuiDrawer-paper': closedMixin(theme),
-    }),
-  }),
-);
 
 export default function MiniDrawer() {
   const { state, dispatch } = React.useContext(MenuContext)
   const [open, setOpen] = React.useState(state.open)
 
-  const theme = useTheme();
-
-  const handleDrawerOpen = () => {
-    dispatch({ type: 'setMenu', payload: true })
-    setOpen(true)
-  };
-
-  const handleDrawerClose = () => {
-    dispatch({ type: 'setMenu', payload: false })
-    setOpen(false)
+  const handleDrawerToggle = () => {
+    const newState = !open;
+    dispatch({ type: 'setMenu', payload: newState })
+    setOpen(newState)
   };
 
   return (
-    <>
-      <Drawer variant="permanent" open={open} >
-        <DrawerHeader>
-          {!open ? <>
-            <IconButton
-              color="inherit"
-              aria-label="open drawer"
-              onClick={() => handleDrawerOpen()}
-              edge="start"
-              sx={{
-                ...(open && { display: 'none' }),
-              }}
-            >
-              <ChevronRightIcon />
-            </IconButton>
-          </> : <>
-            <IconButton onClick={() => handleDrawerClose()}>
-              {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-            </IconButton>
-          </>}
-        </DrawerHeader>
-        {open ?
-          <Image src={'/Logo_Lab.jpg'} alt='Logo_Lab' style={{ alignSelf: 'center', margin: '10px' }} height={78} width={220} /> :
-          <Image src={'/logo_Lab_sm.png'} alt='Logo_Lab_sm' style={{ alignSelf: 'center', margin: '10px' }} height={40} width={40} />
-        }
-        <Divider />
+    <Drawer variant="permanent" open={open}>
+      <DrawerContainer>
+        <LogoContainer>
+          <Image
+            src={open ? '/Logo_Lab.jpg' : '/logo_Lab_sm.png'}
+            alt='Logo Lab'
+            height={open ? 78 : 40}
+            width={open ? 220 : 40}
+            style={{
+              transition: 'all 0.3s ease'
+            }}
+          />
+        </LogoContainer>
+
         <List><MainListItems /></List>
         <List style={{ marginTop: 'auto' }}><SecondaryListItems /></List>
-      </Drawer>
-    </>
+
+        <ToggleButton
+          onClick={handleDrawerToggle}
+          open={open}
+        >
+          {open ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+        </ToggleButton>
+      </DrawerContainer>
+    </Drawer>
   );
 }
