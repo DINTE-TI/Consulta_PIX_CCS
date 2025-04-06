@@ -1,17 +1,21 @@
 'use client'
 
-import { Suspense, useContext, useEffect, useState } from 'react';
-import { Context } from '../context';
-import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
-import axios from "axios";
+import Button from '@mui/material/Button';
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
-import Button from '@mui/material/Button';
+import Grid from "@mui/material/Grid";
+import axios from "axios";
 import Link from 'next/link';
+import { Suspense, useContext, useEffect, useState } from 'react';
+import { Context } from '../context';
 import withAuth from '/src/app/auth/withAuth';
+import Breadcrumbs from "@mui/material/Breadcrumbs";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import HomeIcon from "@mui/icons-material/Home";
+import Typography from "@mui/material/Typography";
 
 import CCSRow from './components/CCSRow';
 
@@ -70,6 +74,12 @@ const DashCCS = () => {
 
   return (
     <Box style={{ margin: 10 }}>
+      <Breadcrumbs aria-label="breadcrumb" separator={<NavigateNextIcon fontSize="small" />} sx={{ mb: 2 }}>
+        <Link underline="hover" href="/">
+          <HomeIcon sx={{ mt: 1, color: 'gray' }} />
+        </Link>
+        <Typography sx={{ color: 'text.primary', fontWeight: 'bold' }}>Solicitações CCS</Typography>
+      </Breadcrumbs>
       <Grid container spacing={2}>
         <Grid item xs={5} md={5} style={{ display: 'flex', alignItems: 'center', justifyContent: 'left' }} >
           <Link href="/ccs/novo">

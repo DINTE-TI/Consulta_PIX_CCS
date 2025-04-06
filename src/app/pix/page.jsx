@@ -1,18 +1,22 @@
 'use client'
 
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import HomeIcon from '@mui/icons-material/Home';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import Box from "@mui/material/Box";
+import Breadcrumbs from '@mui/material/Breadcrumbs';
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Grid from "@mui/material/Grid";
+import Typography from '@mui/material/Typography';
 import axios from "axios";
 import Link from 'next/link';
 import { Suspense, useContext, useEffect, useState } from 'react';
 import CustomActionButton from '../components/Buttons/CustomActionButton';
 import { Context } from '../context';
 import withAuth from '/src/app/auth/withAuth';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 
 import PIXRow from './components/PIXRow';
 
@@ -71,12 +75,18 @@ const DashPIX = () => {
 
   return (
     <Box style={{ margin: 10 }}>
+      <Breadcrumbs aria-label="breadcrumb" separator={<NavigateNextIcon fontSize="small" />} sx={{ mb: 2 }}>
+        <Link underline="hover" href="/">
+          <HomeIcon sx={{ mt: 1, color: 'gray' }} />
+        </Link>
+        <Typography sx={{ color: 'text.primary', fontWeight: 'bold' }}>Solicitações Pix</Typography>
+      </Breadcrumbs>
+      <Grid item xs={5} md={5} style={{ display: 'flex', alignItems: 'center', justifyContent: 'right' }} >
+        <Link href="/pix/novo">
+          <CustomActionButton icon={<AddCircleOutlineIcon sx={{ marginRight: '5px' }} />} text="Nova Solicitação" />
+        </Link>
+      </Grid>
       <Grid container spacing={2}>
-        <Grid item xs={5} md={5} style={{ display: 'flex', alignItems: 'center', justifyContent: 'left' }} >
-          <Link href="/pix/novo">
-            <CustomActionButton icon={<AddCircleOutlineIcon sx={{ marginRight: '5px' }} />} text="Nova Solicitação" />
-          </Link>
-        </Grid>
         {
           loading ?
             <LoadingDialog />
