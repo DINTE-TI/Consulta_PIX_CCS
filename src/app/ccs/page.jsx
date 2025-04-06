@@ -17,81 +17,81 @@ import CCSRow from './components/CCSRow';
 
 const DashCCS = () => {
 
-    const { state, dispatch } = useContext(Context);
+  const { state, dispatch } = useContext(Context);
 
-    //variável para controle de carregamento de página
-    const [loading, setLoading] = useState(true)
+  //variável para controle de carregamento de página
+  const [loading, setLoading] = useState(true)
 
-    // variável para armazenar a lista de Requisições exibidas no FrontEnd
-    const [requisicoesCCS, setRequisicoesCCS] = useState([]);
+  // variável para armazenar a lista de Requisições exibidas no FrontEnd
+  const [requisicoesCCS, setRequisicoesCCS] = useState([]);
 
-    // variável para recuperar o CPF do usuário do Context
-    const cpfResponsavel = state.cpf
-    const token = state.token
+  // variável para recuperar o CPF do usuário do Context
+  const cpfResponsavel = state.cpf
+  const token = state.token
 
-    // Chamada da API para Buscar Requisições armazenadas no Banco de Dados
+  // Chamada da API para Buscar Requisições armazenadas no Banco de Dados
 
-    useEffect(() => {
-        const buscaRequisicoes = async () => {
-            setLoading(true)
-            await axios
-                .get(
-                    "/api/bacen/ccs/requisicoesccs?cpfResponsavel=" + cpfResponsavel + '&token=' + token
-                )
-                .then((response) => response.data)
-                .then((res) => {
-                    setRequisicoesCCS(res)
-                    setLoading(false);
-                })
-                .catch((err) => console.error(err));
-        };
-        buscaRequisicoes();
-    }, [cpfResponsavel, token])
+  useEffect(() => {
+    const buscaRequisicoes = async () => {
+      setLoading(true)
+      await axios
+        .get(
+          "/api/bacen/ccs/requisicoesccs?cpfResponsavel=" + cpfResponsavel + '&token=' + token
+        )
+        .then((response) => response.data)
+        .then((res) => {
+          setRequisicoesCCS(res)
+          setLoading(false);
+        })
+        .catch((err) => console.error(err));
+    };
+    buscaRequisicoes();
+  }, [cpfResponsavel, token])
 
 
-    // Componente DIALOG (popup) para mostrar que a página está sendo carregada
+  // Componente DIALOG (popup) para mostrar que a página está sendo carregada
 
-    function LoadingDialog() {
-        return (
-            <>
-                <Dialog open={loading}>
-                    <DialogTitle>
-                        Carregando...
-                    </DialogTitle>
-                    <DialogContent>
-                        <DialogContentText id="alert-dialog-slide-description">
-                            Por favor, aguarde.
-                        </DialogContentText>
-                    </DialogContent>
-                </Dialog>
-            </>
-        );
-    }
-
+  function LoadingDialog() {
     return (
-        <Box style={{ margin: 10 }}>
-            <Grid container spacing={2}>
-                <Grid item xs={5} md={5} style={{ display: 'flex', alignItems: 'center', justifyContent: 'left' }} >
-                    <Link href="/ccs/novo">
-                        <Button style={{ marginInlineEnd: 20 }} variant="contained" size="small" >
-                            Nova Solicitação
-                        </Button>
-                    </Link>
-                </Grid>
-                {
-                    loading ?
-                        <LoadingDialog />
-                        :
-                        <>
-                            <Suspense fallback={<span>Carregando Requisições CCS...</span>}>
-                                <CCSRow requisicoes={requisicoesCCS} />
-                            </Suspense>
-                        </>
-                }
+      <>
+        <Dialog open={loading}>
+          <DialogTitle>
+            Carregando...
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-slide-description">
+              Por favor, aguarde.
+            </DialogContentText>
+          </DialogContent>
+        </Dialog>
+      </>
+    );
+  }
 
-            </Grid>
-        </Box>
-    )
+  return (
+    <Box style={{ margin: 10 }}>
+      <Grid container spacing={2}>
+        <Grid item xs={5} md={5} style={{ display: 'flex', alignItems: 'center', justifyContent: 'left' }} >
+          <Link href="/ccs/novo">
+            <Button style={{ marginInlineEnd: 20 }} variant="contained" size="small" >
+              Nova Solicitação
+            </Button>
+          </Link>
+        </Grid>
+        {
+          loading ?
+            <LoadingDialog />
+            :
+            <>
+              <Suspense fallback={<span>Carregando Requisições CCS...</span>}>
+                <CCSRow requisicoes={requisicoesCCS} />
+              </Suspense>
+            </>
+        }
+
+      </Grid>
+    </Box>
+  )
 }
 
 export default withAuth(DashCCS)
