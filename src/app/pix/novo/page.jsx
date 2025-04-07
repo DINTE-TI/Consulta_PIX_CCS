@@ -1,8 +1,10 @@
 'use client'
 
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import HomeIcon from '@mui/icons-material/Home';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import { TextField, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
@@ -13,11 +15,14 @@ import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import Paper from '@mui/material/Paper';
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -31,20 +36,15 @@ import DialogRequisicoesPIX from '../components/DialogRequisicoesPIX';
 import withAuth from '/src/app/auth/withAuth';
 import { Context } from '/src/app/context';
 import DialogRelatorioPIX from '/src/app/pix/components/Relatorios/ExportaRelatorioPIX';
-import HomeIcon from '@mui/icons-material/Home';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 
 const ConsultaPix = () => {
 
-  // variável para armazenar se a consulta será feita por CPF ou Chave PIX
   const [value, setValue] = React.useState('cpfCnpj');
 
-  // Alterar variável value de acordo com alteração do Radio Button
   const handleChange = (event) => {
     setValue(event.target.value)
   };
 
-  // variáveis para armazenar CPF, CNPJ, Chave PIX e Motivo da consulta
   let initialValues = {
     cpfCnpj: '',
     motivo: '',
@@ -52,25 +52,20 @@ const ConsultaPix = () => {
   }
   let [argsBusca, setArgsBusca] = React.useState([initialValues])
 
-  //variável para controle de carregamento de página
   const [loading, setLoading] = React.useState(false)
 
-  // variáveis para controle de soliticação de chaves
   const [openDialogRequisicoesPIX, setOpenDialogRequisicoesPIX] = React.useState(false);
   const [statusRequisicoes, setStatusRequisicoes] = React.useState(false);
   const [message, setMessage] = React.useState([]);
   const [deAcordo, setDeAcordo] = React.useState(false);
 
-  // variável para armazenar a lista de Chaves PIX exibidas no FrontEnd
   const [lista, setLista] = React.useState([]);
 
-  // variável para recuperar o CPF do usuário do Context
   const { state, dispatch } = React.useContext(Context)
   const cpfResponsavel = state.cpf
   const lotacao = state.lotacao
   const token = state.token
 
-  // Caso haja solicitação de detalhamento, as informações ficam nessa variável antes de serem atribuídas para a lista
   const searchParams = useSearchParams()
   const query = searchParams.get('selected')
 
@@ -90,7 +85,6 @@ const ConsultaPix = () => {
     }
   }, [query])
 
-  // Função para Adicionar mais um item à consulta
   function addConsulta() {
     let lastIndex = argsBusca.length - 1;
     let newObject = {
@@ -104,14 +98,12 @@ const ConsultaPix = () => {
     ])
   }
 
-  // Função para Remover um item da consulta
   function remConsulta(i) {
     let newArr = [...argsBusca];
     newArr.splice(i, 1);
     setArgsBusca(newArr);
   }
 
-  // Função para Preenchimento do Array de Busca ao digitar nos campos, bem como para Formatar Campo CPF / CNPJ para excluir caracteres não numéricos do campo de Pesquisa
   const setFormValues = (e, i, name = '') => {
     let newArr = [...argsBusca];
     switch (e.target.name) {
@@ -128,7 +120,6 @@ const ConsultaPix = () => {
     setArgsBusca(newArr)
   }
 
-  // Formatar CPF / CNPJ para apresentação no FrontEnd
   const formatCnpjCpf = (value) => {
     const cnpjCpf = value.replace(/\D/g, '')
     if (cnpjCpf.length === 11) {
@@ -137,13 +128,11 @@ const ConsultaPix = () => {
     return cnpjCpf.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/g, "\$1.\$2.\$3/\$4-\$5");
   }
 
-  // Formatar Datas para apresentação no FrontEnd
   const formatarData = (data) => {
     return data.match(/\d{2}[-\w\_\.\/]\d{2}[-\w\_\.\/]\d{4}/gi)
   }
 
 
-  // variáveis e funções de controle de abertura de popup para Exportação de Dados
   const [openDialogRelatorio, setOpenDialogRelatorio] = React.useState(false);
   const [tipoRelatorio, setTipoRelatorio] = React.useState();
 
@@ -152,7 +141,6 @@ const ConsultaPix = () => {
     setOpenDialogRelatorio(true)
   }
 
-  // Chamada da API para Buscar Chaves PIX no Banco Central
   const buscaPIX = async () => {
     if (deAcordo) {
       if (value === 'cpfCnpj') {
@@ -219,7 +207,6 @@ const ConsultaPix = () => {
     }
   }
 
-  // Função para Montar as LINHAS da Tabela no FrontEnd (sem o cabeçalho, pois o cabeçalho está no return)
   function Row(props) {
     const { item } = props;
     const [open, setOpen] = React.useState(false);
@@ -300,7 +287,6 @@ const ConsultaPix = () => {
     )
   }
 
-  // Componente DIALOG (popup) para mostrar que a página está sendo carregada
 
   function LoadingDialog() {
     return (
@@ -319,7 +305,6 @@ const ConsultaPix = () => {
     );
   }
 
-  // Retorno do Componente Principal, com o Formulário de Consulta e a chamada da Tabela, já com cabeçalho
   return (
     <Box style={{ margin: 10 }}>
       <Breadcrumbs aria-label="breadcrumb" separator={<NavigateNextIcon fontSize="small" />} sx={{ mb: 2 }}>
@@ -329,17 +314,39 @@ const ConsultaPix = () => {
         <Link underline="hover" color="inherit" href="/pix">Solicitações  Pix</Link>
         <Typography sx={{ color: 'text.primary', fontWeight: 'bold' }}>Nova Solicitação</Typography>
       </Breadcrumbs>
-      <Grid container spacing={2} justifyContent="space-between">
-        <Grid container direction='row' item xs={5} md={5} xl={5}>
+      <Grid container spacing={2} justifyContent="center" alignItems="center">
+        <Grid item xs={12} md={3}>
+          <FormControl style={{ verticalAlign: 'middle', marginRight: 20 }}>
+            <RadioGroup
+              aria-labelledby="demo-controlled-radio-buttons-group"
+              name="controlled-radio-buttons-group"
+              value={value}
+              onChange={handleChange}
+              row
+            >
+              <FormControlLabel
+                id="cpf_cnpj"
+                value="cpfCnpj"
+                control={<Radio size='small' style={{ margin: 0, alignItems: 'center', padding: 5 }} />}
+                label={<Typography style={{ fontSize: 14 }}>Por CPF/CNPJ</Typography>}
+              />
+              <FormControlLabel
+                value="chave"
+                control={<Radio size='small' style={{ margin: 0, alignItems: 'center', padding: 5 }} />}
+                label={<Typography style={{ fontSize: 14 }}>Por Chave PIX</Typography>}
+              />
+            </RadioGroup>
+          </FormControl>
+        </Grid>
+        <Grid container direction='row' item xs={9} md={9} xl={9}>
           {argsBusca.map((arg, i) => (
             <React.Fragment key={i}>
-              <Grid container direction='row' item xs={12} md={12} xl={12}>
-                <Grid container item direction="row" justifyContent="space-between" alignItems="flex-end" xs={2} md={2} xl={2}>
+              <Grid container direction='row' item xs={12} md={12} xl={12} alignItems="flex-end">
+                <Grid container item direction="row" justifyContent="flex-start" alignItems="flex-end" xs={1} md={1} xl={1}>
                   {
                     (argsBusca.length == 1) ? (
                       <>
-                        <Grid item xs={6}></Grid>
-                        <Grid item xs={6}>
+                        <Grid item>
                           <IconButton onClick={() => addConsulta()}>
                             <AddCircleOutlineIcon sx={{ fontSize: 25 }} color="primary" />
                           </IconButton>
@@ -348,12 +355,12 @@ const ConsultaPix = () => {
                     ) : (
                       ((i) == (argsBusca.length - 1)) ? (
                         <>
-                          <Grid item xs={6}>
+                          <Grid item style={{ display: 'inline-flex' }}>
                             <IconButton onClick={() => remConsulta(i)}>
                               <RemoveCircleOutlineIcon sx={{ fontSize: 25 }} color='error' />
                             </IconButton>
                           </Grid>
-                          <Grid item xs={6}>
+                          <Grid item style={{ display: 'inline-flex' }}>
                             <IconButton onClick={() => addConsulta()}>
                               <AddCircleOutlineIcon sx={{ fontSize: 25 }} color="primary" />
                             </IconButton>
@@ -370,10 +377,10 @@ const ConsultaPix = () => {
                     )
                   }
                 </Grid>
-                <Grid item xs={10} md={10} xl={10} style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+                <Grid item xs={11} md={11} xl={11} style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-start' }}>
                   {value === 'cpfCnpj' ?
                     <TextField
-                      style={{ marginInlineEnd: 20 }}
+                      style={{ marginRight: 20 }}
                       name='cpfCnpj'
                       value={arg.cpfCnpj}
                       onChange={e => setFormValues(e, i)}
@@ -386,8 +393,7 @@ const ConsultaPix = () => {
                   }
                   {value === 'chave' ?
                     <TextField
-                      fullWidth
-                      style={{ marginInlineEnd: 20 }}
+                      style={{ marginRight: 20, width: '200px' }}
                       name='chave'
                       value={arg.chave}
                       onChange={e => setFormValues(e, i)}
@@ -399,7 +405,7 @@ const ConsultaPix = () => {
                     /> : null
                   }
                   <TextField
-                    fullWidth
+                    style={{ width: '200px' }}
                     size="small"
                     id="standard-basic"
                     label="Motivo"
@@ -413,29 +419,6 @@ const ConsultaPix = () => {
               </Grid>
             </React.Fragment>
           ))}
-        </Grid>
-        <Grid item xs={5} md={5} style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'right' }} >
-          <Button style={{ marginInlineEnd: 20 }} variant="contained" size="small" onClick={buscaPIX} >
-            Pesquisar
-          </Button>
-          <Button style={{ marginInlineEnd: 20 }} variant="outlined" size="small" onClick={() => setLista([])} >
-            Limpar
-          </Button>
-          <Button style={{ marginInlineEnd: 20 }} disabled={(lista.length == 0) && true} variant="outlined" color='error' size="small" onClick={() => callExportDialog('pdf')} >
-            Exportar PDF
-          </Button>
-          <Button style={{ marginInlineEnd: 20 }} disabled={(lista.length == 0) && true} variant="outlined" color='success' size="small" onClick={() => callExportDialog('etc')} >
-            Exportar ...
-          </Button>
-          {
-            openDialogRelatorio &&
-            <DialogRelatorioPIX
-              openDialogRelatorio={openDialogRelatorio}
-              setOpenDialogRelatorio={setOpenDialogRelatorio}
-              tipoRelatorio={tipoRelatorio}
-              lista={lista}
-            />
-          }
         </Grid>
         {(argsBusca[0] != initialValues) && (
           <>
@@ -453,6 +436,29 @@ const ConsultaPix = () => {
             </Grid>
           </>
         )}
+        <Grid item xs={12} md={12} style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end', marginTop: 20 }} >
+          <Button style={{ marginRight: 10 }} variant="contained" size="small" onClick={buscaPIX} >
+            Pesquisar
+          </Button>
+          <Button style={{ marginRight: 10 }} variant="outlined" size="small" onClick={() => setLista([])} >
+            Limpar
+          </Button>
+          <Button style={{ marginRight: 10 }} disabled={(lista.length == 0) && true} variant="outlined" color='error' size="small" onClick={() => callExportDialog('pdf')} >
+            Exportar PDF
+          </Button>
+          <Button style={{ marginRight: 10 }} disabled={(lista.length == 0) && true} variant="outlined" color='success' size="small" onClick={() => callExportDialog('etc')} >
+            Exportar ...
+          </Button>
+          {
+            openDialogRelatorio &&
+            <DialogRelatorioPIX
+              openDialogRelatorio={openDialogRelatorio}
+              setOpenDialogRelatorio={setOpenDialogRelatorio}
+              tipoRelatorio={tipoRelatorio}
+              lista={lista}
+            />
+          }
+        </Grid>
         <Grid item xs={12} md={12}>
           <TableContainer component={Paper} id='table'>
             <Table sx={{ minWidth: 650 }} aria-label="collapsible table">
@@ -491,7 +497,7 @@ const ConsultaPix = () => {
           </TableContainer>
         </Grid>
       </Grid>
-    </Box>
+    </Box >
   )
 }
 
