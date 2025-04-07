@@ -81,7 +81,7 @@ const DashPIX = () => {
         </Link>
         <Typography sx={{ color: 'text.primary', fontWeight: 'bold' }}>Solicitações Pix</Typography>
       </Breadcrumbs>
-      <Grid item xs={5} md={5} style={{ display: 'flex', alignItems: 'center', justifyContent: 'right' }} >
+      <Grid item xs={5} md={5} mb={2} style={{ display: 'flex', alignItems: 'center', justifyContent: 'right' }} >
         <Link href="/pix/novo">
           <CustomActionButton icon={<AddCircleOutlineIcon sx={{ marginRight: '5px' }} />} text="Nova Solicitação" />
         </Link>

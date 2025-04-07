@@ -1,43 +1,48 @@
 'use client'
-
-import Button from '@mui/material/Button';
-import Checkbox from '@mui/material/Checkbox';
-import Grid from "@mui/material/Grid";
-import Paper from "@mui/material/Paper";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TablePagination from '@mui/material/TablePagination';
-import TableRow from "@mui/material/TableRow";
-import Toolbar from '@mui/material/Toolbar';
-import Tooltip from '@mui/material/Tooltip';
-import Typography from '@mui/material/Typography';
+import SearchIcon from '@mui/icons-material/Search';
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
+import {
+  Box,
+  Button,
+  Checkbox,
+  Chip,
+  Grid,
+  InputAdornment,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TableSortLabel,
+  TextField,
+  Toolbar,
+  Tooltip,
+  Typography,
+  useMediaQuery,
+  useTheme
+} from '@mui/material';
+import { GeistSans } from 'geist/font/sans';
 import Link from 'next/link';
-import React, { useState } from 'react';
-
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { v4 as uuidv4 } from "uuid";
 
-const PIXRow = (props) => {
+const PIXRow = ({ requisicoes = [] }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const searchInputRef = useRef(null);
 
-  const { requisicoes } = props;
-
-  // Variáveis e Funções para apresentação de Tabelas
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(20);
+  const [selected, setSelected] = useState([]);
+  const [detalhe, setDetalhe] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [order, setOrder] = useState('desc');
+  const [orderBy, setOrderBy] = useState('data');
 
-  // Variável para armazenar quais itens estão checados no CheckBox
-  const [selected, setSelected] = React.useState([]);
-
-  // Variável para armazenar quais itens serão detalhados
-  const [detalhe, setDetalhe] = React.useState([]);
-
-  React.useEffect(() => {
-
-  }, [selected, detalhe])
-
-  const handleChangePage = (event, newPage) => {
+  const handleChangePage = (_, newPage) => {
     setPage(newPage);
   };
 
@@ -46,13 +51,18 @@ const PIXRow = (props) => {
     setPage(0);
   };
 
+  const handleRequestSort = (property) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
+
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newDetalhe = requisicoes.map((n) => n);
-      setDetalhe(newDetalhe)
-      localStorage.setItem("detalhe", JSON.stringify(requisicoes));
-      const newSelected = requisicoes.map((n) => n.id);
+      const newSelected = sortedAndFilteredRequisicoes.map((n) => n.id);
       setSelected(newSelected);
+      setDetalhe([...sortedAndFilteredRequisicoes]);
+      localStorage.setItem("detalhe", JSON.stringify(sortedAndFilteredRequisicoes));
       return;
     }
     setSelected([]);
@@ -67,24 +77,29 @@ const PIXRow = (props) => {
     let newDetalhe = [];
 
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, id);
-      newDetalhe = newDetalhe.concat(detalhe, requisicao);
+      // Add to selection
+      newSelected = [...selected, id];
+      newDetalhe = [...detalhe, requisicao];
     } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-      newDetalhe = newDetalhe.concat(detalhe.slice(1));
+      // Remove from beginning
+      newSelected = selected.slice(1);
+      newDetalhe = detalhe.slice(1);
     } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-      newDetalhe = newDetalhe.concat(detalhe.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
-      );
-      newDetalhe = newDetalhe.concat(
-        detalhe.slice(0, selectedIndex),
-        detalhe.slice(selectedIndex + 1),
-      );
+      // Remove from end
+      newSelected = selected.slice(0, -1);
+      newDetalhe = detalhe.slice(0, -1);
+    } else {
+      // Remove from middle
+      newSelected = [
+        ...selected.slice(0, selectedIndex),
+        ...selected.slice(selectedIndex + 1)
+      ];
+      newDetalhe = [
+        ...detalhe.slice(0, selectedIndex),
+        ...detalhe.slice(selectedIndex + 1)
+      ];
     }
+    
     setSelected(newSelected);
     setDetalhe(newDetalhe);
     localStorage.setItem("detalhe", JSON.stringify(newDetalhe));
@@ -92,159 +107,318 @@ const PIXRow = (props) => {
 
   const isSelected = (id) => selected.indexOf(id) !== -1;
 
-  // Formatar CPF / CNPJ para apresentação no FrontEnd
-
   const formatCnpjCpf = (value) => {
-    const cnpjCpf = value.replace(/\D/g, '')
-    if (cnpjCpf.length === 11) {
-      return cnpjCpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/g, "\$1.\$2.\$3-\$4");
+    const cnpjCpf = value.replace(/\D/g, '');
+    return cnpjCpf.length === 11
+      ? cnpjCpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/g, "$1.$2.$3-$4")
+      : cnpjCpf.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/g, "$1.$2.$3/$4-$5");
+  };
+
+  const getDisplayName = (requisicao) => {
+    if (requisicao.resultado !== 'Sucesso') {
+      return requisicao.resultado.toUpperCase();
     }
-    return cnpjCpf.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/g, "\$1.\$2.\$3/\$4-\$5");
-  }
+    
+    if (requisicao.tipoBusca === 'cpf/cnpj') {
+      const vinculo = requisicao.vinculos[0];
+      return (vinculo.nomeProprietario || vinculo.nomeProprietarioBusca).toUpperCase();
+    }
+    
+    return requisicao.vinculos.nomeProprietario.toUpperCase();
+  };
 
+  const sortRequisicoes = (reqs, orderBy, order) => {
+    return [...reqs].sort((a, b) => {
+      if (orderBy === 'data') {
+        const dateA = new Date(a.data).getTime();
+        const dateB = new Date(b.data).getTime();
+        return order === 'asc' ? dateA - dateB : dateB - dateA;
+      }
+      return 0;
+    });
+  };
 
-  // Toolbar para a Tabela
+  const handleSearchChange = (event) => {
+    const newValue = event.target.value;
+    setSearchTerm(newValue);
+  };
 
-  function TableToolbar(props) {
-    const { numSelected } = props;
-    return (
-      <Toolbar>
-        {numSelected > 0 ? (
-          <>
-            <Typography
-              sx={{ flex: '1 1 100%' }}
-              variant="h6"
-              id="tableTitle"
-              component="div"
-            >
-              Solicitações Recentes
-            </Typography>
-            <Tooltip title="detalhar">
-              <Link
-                href={{
-                  pathname: '/pix/novo',
-                  query: { selected: 'true' },
-                }}
-              >
-                <Button style={{ marginInlineEnd: 20 }} variant="contained" size="small" >
-                  Detalhar
-                </Button>
-              </Link>
-            </Tooltip>
-          </>
-        ) : (
-          <>
-            <Typography
-              sx={{ flex: '1 1 100%' }}
-              variant="h6"
-              id="tableTitle"
-              component="div"
-            >
-              Solicitações Recentes
-            </Typography>
-          </>
-        )}
-      </Toolbar>
+  const filteredRequisicoes = useMemo(() => {
+    if (!searchTerm.trim()) return requisicoes;
+    
+    return requisicoes.filter(req => {
+      const nome = getDisplayName(req).toLowerCase();
+      const chaveBusca = req.chaveBusca.toLowerCase();
+      const searchLower = searchTerm.toLowerCase();
+      
+      return nome.includes(searchLower) || chaveBusca.includes(searchLower);
+    });
+  }, [requisicoes, searchTerm]);
+
+  const sortedAndFilteredRequisicoes = useMemo(() => {
+    return sortRequisicoes(filteredRequisicoes, orderBy, order);
+  }, [filteredRequisicoes, orderBy, order]);
+
+  const paginatedRequisicoes = useMemo(() => {
+    return sortedAndFilteredRequisicoes.slice(
+      page * rowsPerPage, 
+      page * rowsPerPage + rowsPerPage
     );
-  }
+  }, [sortedAndFilteredRequisicoes, page, rowsPerPage]);
 
+  useEffect(() => {
+    setPage(0);
+  }, [searchTerm]);
 
-  // Função para Montar a LINHA de Cabeçalho
+  const getTypeBadgeColor = (type) => {
+    switch(type.toLowerCase()) {
+      case 'cpf/cnpj': return 'primary';
+      case 'email': return 'success';
+      case 'telefone': return 'info';
+      case 'chave aleatória': return 'warning';
+      default: return 'default';
+    }
+  };
 
-  function Head(props) {
-    const { onSelectAllClick, numSelected, rowCount } = props;
-    return (
-      <TableHead>
-        <TableRow>
-          <TableCell padding="checkbox">
-            <Checkbox
-              color="primary"
-              indeterminate={numSelected > 0 && numSelected < rowCount}
-              checked={rowCount > 0 && numSelected === rowCount}
-              onChange={onSelectAllClick}
-              inputProps={{
-                'aria-label': 'select all desserts',
+  const TableToolbar = ({ numSelected }) => (
+    <Toolbar
+      sx={{
+        pl: { sm: 2 },
+        pr: { xs: 1, sm: 1 },
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: 2,
+        py: 2
+      }}
+    >
+      <FormatListBulletedIcon sx={{ color: '#0a243b9e' }} />
+      <Typography
+        sx={{ flex: '1 1 100%', fontFamily: `${GeistSans.className}` }}
+        variant="h6"
+        id="tableTitle"
+        component="div"
+        color="#0a243b9e"
+      >
+        Solicitações Pix
+      </Typography>
+      
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: isMobile ? '100%' : 'auto' }}>
+        <TextField
+          inputRef={searchInputRef}
+          placeholder="Nome ou chave"
+          size="small"
+          value={searchTerm}
+          onChange={handleSearchChange}
+          onClick={(e) => e.stopPropagation()}
+          onFocus={(e) => e.stopPropagation()}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon fontSize="small" />
+              </InputAdornment>
+            ),
+            sx: { whiteSpace: 'nowrap' }
+          }}
+          sx={{
+            width: isMobile ? '100%' : '180px',
+            '& .MuiInputBase-root': {
+              height: '36px',
+              whiteSpace: 'nowrap'
+            }
+          }}
+        />
+        {numSelected > 0 && (
+          <Tooltip title="Detalhar">
+            <Link
+              href={{
+                pathname: '/pix/novo',
+                query: { selected: 'true' },
               }}
-            />
-          </TableCell>
-          <TableCell>Chave de Busca</TableCell>
-          <TableCell>Nome</TableCell>
-          <TableCell>Tipo</TableCell>
-          <TableCell>Data</TableCell>
-          <TableCell>Caso</TableCell>
-        </TableRow>
-      </TableHead>
-    )
-  }
+              style={{ textDecoration: 'none' }}
+            >
+              <Button
+                variant="contained"
+                size="small"
+                sx={{ whiteSpace: 'nowrap' }}
+              >
+                Detalhar ({numSelected})
+              </Button>
+            </Link>
+          </Tooltip>
+        )}
+      </Box>
 
-  // Função para Montar as LINHAS da Tabela no FrontEnd (sem o cabeçalho, pois o cabeçalho está no return)
-  function Row(props) {
-    const { requisicao } = props;
+    </Toolbar>
+  );
+
+  const TableHeader = ({ onSelectAllClick, numSelected, rowCount }) => (
+    <TableHead>
+      <TableRow>
+        <TableCell padding="checkbox">
+          <Checkbox
+            color="primary"
+            indeterminate={numSelected > 0 && numSelected < rowCount}
+            checked={rowCount > 0 && numSelected === rowCount}
+            onChange={onSelectAllClick}
+            inputProps={{
+              'aria-label': 'selecionar todas requisições',
+            }}
+          />
+        </TableCell>
+        <TableCell>
+          <TableSortLabel
+            active={orderBy === 'data'}
+            direction={orderBy === 'data' ? order : 'asc'}
+            onClick={() => handleRequestSort('data')}
+          >
+            <Typography fontFamily={GeistSans.className}>
+              Solicitado em
+            </Typography>
+          </TableSortLabel>
+        </TableCell>
+        <TableCell>
+          <Typography fontFamily={GeistSans.className}>
+            Chave de Busca
+          </Typography>
+        </TableCell>
+        <TableCell>
+          <Typography fontFamily={GeistSans.className}>
+            Nome
+          </Typography>
+        </TableCell>
+        <TableCell>
+          <Typography fontFamily={GeistSans.className}>
+            Tipo
+          </Typography>
+        </TableCell>
+        <TableCell>
+          <Typography fontFamily={GeistSans.className}>
+            Caso
+          </Typography>
+        </TableCell>
+      </TableRow>
+    </TableHead>
+  );
+
+  const DataRow = ({ requisicao }) => {
     const isItemSelected = isSelected(requisicao.id);
-    var dataRequisicao = new Date(requisicao.data);
+    const dataRequisicao = new Date(requisicao.data);
+    
     return (
-      <React.Fragment>
-        <TableRow hover
-          onClick={(event) => handleClick(event, requisicao.id)}
-          role="checkbox"
-          aria-checked={isItemSelected}
-          tabIndex={-1}
-          key={requisicao.id}
-          selected={isItemSelected}
-          sx={{ cursor: 'pointer', "& > *": { borderBottom: "unset" } }}>
-          <TableCell padding="checkbox">
-            <Checkbox
-              color="primary"
-              checked={isItemSelected}
-            />
-          </TableCell>
-          <TableCell>{requisicao.tipoBusca == 'cpf/cnpj' ? formatCnpjCpf(requisicao.chaveBusca) : requisicao.chaveBusca}</TableCell>
-          <TableCell>{requisicao.resultado == 'Sucesso' ? (requisicao.tipoBusca == 'cpf/cnpj' ? (requisicao.vinculos[0].nomeProprietario ? requisicao.vinculos[0].nomeProprietario : requisicao.vinculos[0].nomeProprietarioBusca) : requisicao.vinculos.nomeProprietario).toUpperCase() : requisicao.resultado.toUpperCase()}</TableCell>
-          <TableCell>{(requisicao.tipoBusca).toUpperCase()}</TableCell>
-          <TableCell>{dataRequisicao.toLocaleDateString()}</TableCell>
-          <TableCell>{requisicao.caso}</TableCell>
-        </TableRow>
-      </React.Fragment>
+      <TableRow 
+        hover
+        onClick={(event) => handleClick(event, requisicao.id)}
+        role="checkbox"
+        aria-checked={isItemSelected}
+        tabIndex={-1}
+        key={requisicao.id}
+        selected={isItemSelected}
+        sx={{ cursor: 'pointer', "& > *": { borderBottom: "unset" } }}
+      >
+        <TableCell padding="checkbox">
+          <Checkbox
+            color="primary"
+            checked={isItemSelected}
+          />
+        </TableCell>
+        <TableCell>
+          <Typography fontFamily={GeistSans.className}>
+            {dataRequisicao.toLocaleDateString()}
+          </Typography>
+        </TableCell>
+        <TableCell>
+          <Typography fontFamily={GeistSans.className}>
+            {requisicao.tipoBusca === 'cpf/cnpj' 
+              ? formatCnpjCpf(requisicao.chaveBusca) 
+              : requisicao.chaveBusca}
+          </Typography>
+        </TableCell>
+        <TableCell>
+          <Typography fontFamily={GeistSans.className}>
+            {getDisplayName(requisicao)}
+          </Typography>
+        </TableCell>
+        <TableCell>
+          <Chip 
+            label={requisicao.tipoBusca.toUpperCase()}
+            color={getTypeBadgeColor(requisicao.tipoBusca)}
+            size="small"
+            variant="filled"
+            sx={{ fontFamily: GeistSans.className }}
+          />
+        </TableCell>
+        <TableCell>
+          <Typography fontFamily={GeistSans.className}>
+            {requisicao.caso}
+          </Typography>
+        </TableCell>
+      </TableRow>
     );
-  }
+  };
 
   return (
-    <React.Fragment>
-      <Grid item xs={12} md={12}>
+    <Grid item xs={12}>
+      <Paper 
+        elevation={3} 
+        sx={{ 
+          borderRadius: 2, 
+          overflow: 'hidden',
+          mb: 3
+        }}
+      >
         <TableToolbar numSelected={selected.length} />
-        <TableContainer component={Paper} id="table">
-          <Table sx={{ minWidth: 1200 }} size="small" aria-label="a dense table">
-            <Head
+        <TableContainer 
+          id="table" 
+          sx={{ 
+            maxHeight: 'calc(100vh - 250px)',
+            overflowX: 'auto'
+          }}
+        >
+          <Table 
+            stickyHeader
+            sx={{ 
+              minWidth: isMobile ? 650 : 1200,
+              fontFamily: GeistSans.className
+            }} 
+            size="small" 
+            aria-label="tabela de requisições"
+          >
+            <TableHeader
               numSelected={selected.length}
               onSelectAllClick={handleSelectAllClick}
-              rowCount={requisicoes.length}
+              rowCount={sortedAndFilteredRequisicoes.length}
             />
             <TableBody>
-              {
-                (requisicoes.length > 0) &&
-                requisicoes
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((requisicao) => (
-                    <Row key={uuidv4()} requisicao={requisicao} />
-                  ))
-              }
+              {paginatedRequisicoes.length > 0 ? (
+                paginatedRequisicoes.map((requisicao) => (
+                  <DataRow key={uuidv4()} requisicao={requisicao} />
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
+                    <Typography fontFamily={GeistSans.className}>
+                      {searchTerm ? 'Nenhum resultado encontrado' : 'Nenhuma solicitação disponível'}
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </TableContainer>
         <TablePagination
-          rowsPerPageOptions={[20, 50, 100]}
+          rowsPerPageOptions={[10, 20, 50, 100]}
           component="div"
-          count={requisicoes.length > 0 ? requisicoes.length : 0}
+          count={sortedAndFilteredRequisicoes.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
+          labelRowsPerPage="Linhas por página:"
+          labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+          sx={{ fontFamily: GeistSans.className }}
         />
-      </Grid>
-    </React.Fragment>
-
-  )
-
-}
+      </Paper>
+    </Grid>
+  );
+};
 
 export default PIXRow;
