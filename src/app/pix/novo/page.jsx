@@ -1,504 +1,671 @@
 'use client'
 
+import { GeistSans } from 'geist/font/sans';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import HomeIcon from '@mui/icons-material/Home';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
-import { TextField, Typography } from '@mui/material';
-import Box from '@mui/material/Box';
-import Breadcrumbs from '@mui/material/Breadcrumbs';
-import Button from '@mui/material/Button';
-import Checkbox from '@mui/material/Checkbox';
-import Dialog from '@mui/material/Dialog';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import FormControl from '@mui/material/FormControl';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Grid from '@mui/material/Grid';
-import IconButton from '@mui/material/IconButton';
-import Link from '@mui/material/Link';
-import Paper from '@mui/material/Paper';
-import Radio from '@mui/material/Radio';
-import RadioGroup from '@mui/material/RadioGroup';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
+import {
+  Box, Breadcrumbs, Button, Dialog, DialogContent, DialogContentText,
+  DialogTitle, FormControl, FormControlLabel, Grid, IconButton, Link,
+  Paper, Radio, RadioGroup, Table, TableBody, TableCell, TableContainer,
+  TableHead, TableRow, TextField, Typography
+} from '@mui/material';
 import axios from 'axios';
 import { useSearchParams } from 'next/navigation';
 import * as React from 'react';
+import { useContext, useState, useEffect, Fragment } from 'react';
 import DialogRequisicoesPIX from '../components/DialogRequisicoesPIX';
 import withAuth from '/src/app/auth/withAuth';
 import { Context } from '/src/app/context';
 import DialogRelatorioPIX from '/src/app/pix/components/Relatorios/ExportaRelatorioPIX';
 
+
+const INITIAL_SEARCH_VALUES = {
+  cpfCnpj: '',
+  motivo: '',
+  chave: ''
+};
+
 const ConsultaPix = () => {
+  const [searchType, setSearchType] = useState('cpfCnpj');
+  const [searchParams, setSearchParams] = useState([INITIAL_SEARCH_VALUES]);
+  const [loading, setLoading] = useState(false);
+  const [openDialogRequisicoesPIX, setOpenDialogRequisicoesPIX] = useState(false);
+  const [statusRequisicoes, setStatusRequisicoes] = useState(false);
+  const [message, setMessage] = useState([]);
+  const [deAcordo, setDeAcordo] = useState(false);
+  const [lista, setLista] = useState([]);
+  const [openDialogRelatorio, setOpenDialogRelatorio] = useState(false);
+  const [tipoRelatorio, setTipoRelatorio] = useState();
 
-  const [value, setValue] = React.useState('cpfCnpj');
+  const { state } = useContext(Context);
+  const { cpf: cpfResponsavel, lotacao, token } = state;
 
-  const handleChange = (event) => {
-    setValue(event.target.value)
+  const queryParams = useSearchParams();
+  const selected = queryParams.get('selected');
+
+  useEffect(() => {
+    if (selected === 'true') {
+      setLoading(true);
+      const detalhe = JSON.parse(localStorage.getItem("detalhe"));
+
+      if (detalhe) {
+        const newList = [];
+        detalhe.forEach(item => {
+          if (item.vinculos && item.vinculos.length > 0) {
+            newList.push(...item.vinculos);
+          }
+        });
+
+        setLista(prevLista => [...prevLista, ...newList]);
+      }
+
+      setLoading(false);
+    }
+  }, [selected]);
+
+  const handleSearchTypeChange = (event) => {
+    setSearchType(event.target.value);
   };
 
-  let initialValues = {
-    cpfCnpj: '',
-    motivo: '',
-    chave: ''
-  }
-  let [argsBusca, setArgsBusca] = React.useState([initialValues])
-
-  const [loading, setLoading] = React.useState(false)
-
-  const [openDialogRequisicoesPIX, setOpenDialogRequisicoesPIX] = React.useState(false);
-  const [statusRequisicoes, setStatusRequisicoes] = React.useState(false);
-  const [message, setMessage] = React.useState([]);
-  const [deAcordo, setDeAcordo] = React.useState(false);
-
-  const [lista, setLista] = React.useState([]);
-
-  const { state, dispatch } = React.useContext(Context)
-  const cpfResponsavel = state.cpf
-  const lotacao = state.lotacao
-  const token = state.token
-
-  const searchParams = useSearchParams()
-  const query = searchParams.get('selected')
-
-  React.useEffect(() => {
-    if (query === 'true') {
-      setLoading(true)
-      const detalhe = JSON.parse(localStorage.getItem("detalhe"))
-      for (let i = 0; i < detalhe.length; i++) {
-        let vinculos = detalhe[i].vinculos;
-        if (detalhe[i].vinculos) {
-          for (let j = 0; j < vinculos.length; j++) {
-            setLista((lista) => [...lista, vinculos[j]])
-          }
-        }
-        setLoading(false)
-      }
-    }
-  }, [query])
-
-  function addConsulta() {
-    let lastIndex = argsBusca.length - 1;
-    let newObject = {
+  const addSearchParam = () => {
+    const lastIndex = searchParams.length - 1;
+    const newParam = {
       cpfCnpj: '',
       chave: '',
-      motivo: argsBusca[lastIndex].motivo,
+      motivo: searchParams[lastIndex].motivo,
     };
-    setArgsBusca([
-      ...argsBusca,
-      newObject
-    ])
-  }
+    setSearchParams([...searchParams, newParam]);
+  };
 
-  function remConsulta(i) {
-    let newArr = [...argsBusca];
-    newArr.splice(i, 1);
-    setArgsBusca(newArr);
-  }
+  const removeSearchParam = (index) => {
+    const newParams = [...searchParams];
+    newParams.splice(index, 1);
+    setSearchParams(newParams);
+  };
 
-  const setFormValues = (e, i, name = '') => {
-    let newArr = [...argsBusca];
-    switch (e.target.name) {
-      case 'cpfCnpj':
-        newArr[i].cpfCnpj = e.target.value.replace(/[^0-9]/g, "")
-        break;
-      case 'motivo':
-        newArr[i].motivo = e.target.value
-        break;
-      case 'chave':
-        newArr[i].chave = e.target.value
-        break;
+  const updateSearchParam = (e, index) => {
+    const { name, value } = e.target;
+    const newParams = [...searchParams];
+
+    if (name === 'cpfCnpj') {
+      newParams[index].cpfCnpj = value.replace(/[^0-9]/g, "");
+    } else {
+      newParams[index][name] = value;
     }
-    setArgsBusca(newArr)
-  }
+
+    setSearchParams(newParams);
+  };
 
   const formatCnpjCpf = (value) => {
-    const cnpjCpf = value.replace(/\D/g, '')
+    const cnpjCpf = value.replace(/\D/g, '');
     if (cnpjCpf.length === 11) {
-      return cnpjCpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/g, "\$1.\$2.\$3-\$4");
+      return cnpjCpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/g, "$1.$2.$3-$4");
     }
-    return cnpjCpf.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/g, "\$1.\$2.\$3/\$4-\$5");
-  }
+    return cnpjCpf.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/g, "$1.$2.$3/$4-$5");
+  };
 
   const formatarData = (data) => {
-    return data.match(/\d{2}[-\w\_\.\/]\d{2}[-\w\_\.\/]\d{4}/gi)
-  }
+    return data.match(/\d{2}[-\w\_\.\/]\d{2}[-\w\_\.\/]\d{4}/gi);
+  };
 
+  const openExportDialog = (tipo) => {
+    setTipoRelatorio(tipo);
+    setOpenDialogRelatorio(true);
+  };
 
-  const [openDialogRelatorio, setOpenDialogRelatorio] = React.useState(false);
-  const [tipoRelatorio, setTipoRelatorio] = React.useState();
-
-  const callExportDialog = (tipo) => {
-    setTipoRelatorio(tipo)
-    setOpenDialogRelatorio(true)
-  }
-
-  const buscaPIX = async () => {
-    if (deAcordo) {
-      if (value === 'cpfCnpj') {
-        if (argsBusca.some(arg =>
-          arg.cpfCnpj == '' ||
-          arg.motivo == ''
-        )) {
-          alert("Necessário preencher todos os campos!");
-        } else {
-          setOpenDialogRequisicoesPIX(true)
-          argsBusca.map(async (arg, i, arr) => {
-            await axios.get('/api/bacen/pix/cpfCnpj?cpfCnpj=' + arg.cpfCnpj + '&motivo=' + arg.motivo + '&cpfResponsavel=' + cpfResponsavel + '&lotacao=' + lotacao + '&token=' + token)
-              .then(response => response.data[0])
-              .then((vinculos) => {
-                if (vinculos.length == 0 || vinculos == 'CPF/CNPJ não encontrado' || vinculos == "Nenhuma Chave PIX encontrada") {
-                  setMessage((message) => [...message, { cpfCnpj: arg.cpfCnpj, status: vinculos }])
-                } else {
-                  setMessage((message) => [...message, { cpfCnpj: arg.cpfCnpj, status: 'Recebido com Sucesso' }])
-                  vinculos.map((vinculo) => {
-                    setLista((lista) => [...lista, vinculo])
-                  })
-                }
-                if (arr.length - 1 === i) {
-                  setStatusRequisicoes(true)
-                }
-              })
-              .catch(err => console.error(err))
-            setArgsBusca([initialValues])
-          })
-        }
-      }
-      if (value === 'chave') {
-        if (argsBusca.some(arg =>
-          arg.chave == '' ||
-          arg.motivo == ''
-        )) {
-          alert("Necessário preencher todos os campos!");
-        } else {
-          setOpenDialogRequisicoesPIX(true)
-          argsBusca.map(async (arg, i, arr) => {
-            await axios.get('/api/bacen/pix/chave?chave=' + arg.chave + '&motivo=' + arg.motivo + '&cpfResponsavel=' + cpfResponsavel + '&lotacao=' + lotacao + '&token=' + token)
-              .then((response) => {
-                return response.data
-              })
-              .then((vinculo) => {
-                setMessage((message) => [...message, { chave: arg.chave, status: 'Recebido com Sucesso' }])
-                vinculo.map((vinculo) => {
-                  setLista((lista) => [...lista, vinculo])
-                })
-                if (vinculo.length == 0) {
-                  setMessage((message) => [...message, { chave: arg.chave, status: 'Chave não Encontrada' }])
-                }
-                if (arr.length - 1 === i) {
-                  setStatusRequisicoes(true)
-                }
-              })
-              .catch(err => console.error(err))
-            setArgsBusca([initialValues])
-          })
-        }
-      }
-    } else {
+  const validateSearch = () => {
+    if (!deAcordo) {
       alert("Necessário CONCORDAR com os termos da consulta!");
+      return false;
     }
-  }
 
-  function Row(props) {
-    const { item } = props;
-    const [open, setOpen] = React.useState(false);
+    const requiredFields = searchType === 'cpfCnpj'
+      ? ['cpfCnpj', 'motivo']
+      : ['chave', 'motivo'];
+
+    const hasEmptyFields = searchParams.some(param =>
+      requiredFields.some(field => !param[field])
+    );
+
+    if (hasEmptyFields) {
+      alert("Necessário preencher todos os campos!");
+      return false;
+    }
+
+    return true;
+  };
+
+  const searchByCpfCnpj = async (param, index, array) => {
+    try {
+      const response = await axios.get(
+        `/api/bacen/pix/cpfCnpj?cpfCnpj=${param.cpfCnpj}&motivo=${param.motivo}&cpfResponsavel=${cpfResponsavel}&lotacao=${lotacao}&token=${token}`
+      );
+
+      const vinculos = response.data[0];
+
+      if (!vinculos || vinculos.length === 0 ||
+        vinculos === 'CPF/CNPJ não encontrado' ||
+        vinculos === "Nenhuma Chave PIX encontrada") {
+        setMessage(prev => [...prev, { cpfCnpj: param.cpfCnpj, status: vinculos }]);
+      } else {
+        setMessage(prev => [...prev, { cpfCnpj: param.cpfCnpj, status: 'Recebido com Sucesso' }]);
+        setLista(prev => [...prev, ...vinculos]);
+      }
+
+      if (index === array.length - 1) {
+        setStatusRequisicoes(true);
+      }
+    } catch (err) {
+      console.error(err);
+      setMessage(prev => [...prev, { cpfCnpj: param.cpfCnpj, status: 'Erro na consulta' }]);
+    }
+  };
+
+  const searchByChave = async (param, index, array) => {
+    try {
+      const response = await axios.get(
+        `/api/bacen/pix/chave?chave=${param.chave}&motivo=${param.motivo}&cpfResponsavel=${cpfResponsavel}&lotacao=${lotacao}&token=${token}`
+      );
+
+      const vinculo = response.data;
+
+      if (!vinculo || vinculo.length === 0) {
+        setMessage(prev => [...prev, { chave: param.chave, status: 'Chave não Encontrada' }]);
+      } else {
+        setMessage(prev => [...prev, { chave: param.chave, status: 'Recebido com Sucesso' }]);
+        setLista(prev => [...prev, ...vinculo]);
+      }
+
+      if (index === array.length - 1) {
+        setStatusRequisicoes(true);
+      }
+    } catch (err) {
+      console.error(err);
+      setMessage(prev => [...prev, { chave: param.chave, status: 'Erro na consulta' }]);
+    }
+  };
+
+  const handleSearch = async () => {
+    if (!validateSearch()) return;
+
+    setOpenDialogRequisicoesPIX(true);
+    setMessage([]);
+    setStatusRequisicoes(false);
+
+    const searchFunction = searchType === 'cpfCnpj' ? searchByCpfCnpj : searchByChave;
+
+    searchParams.forEach((param, index, array) => {
+      searchFunction(param, index, array);
+    });
+
+    setSearchParams([INITIAL_SEARCH_VALUES]);
+  };
+
+  const clearResults = () => {
+    setLista([]);
+    setMessage([]);
+  };
+
+  const TableRowItem = ({ item, index }) => {
+    const [open, setOpen] = useState(false);
+    const isEven = index % 2 === 0;
+
+    const getStatusColor = (status) => {
+      const statusColors = {
+        'ATIVO': {
+          bg: '#e6f4ea',
+          color: '#34a853',
+          border: '#34a853'
+        },
+        'INATIVO': {
+          bg: '#fce8e6',
+          color: '#ea4335',
+          border: '#ea4335'
+        },
+        'PORTADA': {
+          bg: '#fff8e1',
+          color: '#fbbc04',
+          border: '#fbbc04'
+        }
+      };
+
+      return statusColors[status] || {
+        bg: '#f1f3f4',
+        color: '#5f6368',
+        border: '#9aa0a6'
+      };
+    };
+
     return (
-      <React.Fragment>
+      <Fragment>
         <TableRow
-          key={item.chave}
-          sx={{ '& > *': { borderBottom: 'unset' } }}
+          sx={{
+            '& > *': { borderBottom: 'unset' },
+            backgroundColor: isEven ? '#fafbfc' : 'white',
+            '&:hover': {
+              backgroundColor: '#f5f7f9',
+              transition: 'all 0.2s ease'
+            },
+            transition: 'all 0.2s ease'
+          }}
+          className={GeistSans.className}
         >
-          <TableCell>
+          <TableCell padding="checkbox">
             <IconButton
               aria-label="expand row"
               size="small"
               onClick={() => setOpen(!open)}
+              sx={{
+                transition: 'transform 0.2s ease',
+                transform: open ? 'rotate(180deg)' : 'rotate(0deg)'
+              }}
             >
               {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
             </IconButton>
           </TableCell>
-          <TableCell component="th" scope="item">
+          <TableCell
+            component="th"
+            scope="row"
+            sx={{
+              fontWeight: 600,
+              color: '#202124',
+              fontFamily: 'monospace'
+            }}
+          >
             {item.chave}
           </TableCell>
-          <TableCell>{item.tipoChave}</TableCell>
-          <TableCell>{item.cpfCnpj ? formatCnpjCpf(item.cpfCnpj) : null}</TableCell>
-          <TableCell>{item.nomeProprietario ? item.nomeProprietario.toUpperCase() : null}</TableCell>
+          <TableCell sx={{
+            color: '#5f6368',
+            fontWeight: 500
+          }}>
+            {item.tipoChave}
+          </TableCell>
+          <TableCell sx={{
+            fontFamily: 'monospace',
+            color: '#202124'
+          }}>
+            {item.cpfCnpj ? formatCnpjCpf(item.cpfCnpj) : null}
+          </TableCell>
+          <TableCell sx={{
+            fontWeight: 500,
+            color: '#202124'
+          }}>
+            {item.nomeProprietario ? item.nomeProprietario.toUpperCase() : null}
+          </TableCell>
           <TableCell>
-            {item.numerobanco + ' ' + item.nomebanco}
-            <br />Agência: {item.agencia}
-            <br />Conta: {parseInt(item.numeroConta, 10)}
-            <br />Tipo: {item.tipoConta}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+              <Typography variant="body2" sx={{
+                fontWeight: 600,
+                color: '#202124'
+              }}>
+                {item.numerobanco + ' - ' + item.nomebanco}
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#5f6368' }}>
+                Agência: {item.agencia} • Conta: {parseInt(item.numeroConta, 10)} • Tipo: {item.tipoConta}
+              </Typography>
+            </Box>
           </TableCell>
-          <TableCell align="right">{item.status}</TableCell>
+          <TableCell align="right">
+            <Box
+              sx={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                px: 1.5,
+                py: 0.5,
+                borderRadius: '16px',
+                ...getStatusColor(item.status),
+                border: '3px solid',
+                borderColor: getStatusColor(item.status).border,
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                lineHeight: 1.5,
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {item.status}
+            </Box>
+          </TableCell>
         </TableRow>
+
         <TableRow>
-          <TableCell style={{ padding: 0 }} colSpan={7}>
-            {open ? (
-              <>
-                <Box sx={{ margin: 1 }}>
-                  <Typography variant="h6" gutterBottom component="div">
-                    Histórico da Chave
-                  </Typography>
-                  <Table size="small" aria-label="purchases">
-                    <TableHead>
-                      <TableRow >
-                        <TableCell>Data</TableCell>
-                        <TableCell>Evento</TableCell>
-                        <TableCell>Motivo</TableCell>
-                        <TableCell>CPF/CNPJ</TableCell>
-                        <TableCell>Nome</TableCell>
-                        <TableCell>Banco</TableCell>
-                        <TableCell>Abertura Conta</TableCell>
+          <TableCell
+            style={{ paddingBottom: 0, paddingTop: 0 }}
+            colSpan={7}
+          >
+            {open && (
+              <Box sx={{ margin: 1 }}>
+                <Typography variant="h6" gutterBottom component="div">
+                  Histórico da Chave
+                </Typography>
+                <Table size="small" aria-label="purchases">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Data</TableCell>
+                      <TableCell>Evento</TableCell>
+                      <TableCell>Motivo</TableCell>
+                      <TableCell>CPF/CNPJ</TableCell>
+                      <TableCell>Nome</TableCell>
+                      <TableCell>Banco</TableCell>
+                      <TableCell>Abertura Conta</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {item.eventosVinculo.map((evento, index) => (
+                      <TableRow key={index}>
+                        <TableCell component="th" scope="evento">{formatarData(evento.dataEvento)}</TableCell>
+                        <TableCell>{evento.tipoEvento}</TableCell>
+                        <TableCell>{evento.motivoEvento}</TableCell>
+                        <TableCell>{evento.cpfCnpj ? formatCnpjCpf(evento.cpfCnpj) : null}</TableCell>
+                        <TableCell>{evento.nomeProprietario ? evento.nomeProprietario.toUpperCase() : null}</TableCell>
+                        <TableCell>
+                          {evento.numerobanco + ' ' + evento.nomebanco}
+
+                          Agência: {evento.agencia}
+
+                          Conta: {parseInt(evento.numeroConta, 10)}
+
+                          Tipo: {evento.tipoConta}
+                        </TableCell>
+                        <TableCell>{formatarData(evento.dataAberturaConta)}</TableCell>
                       </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {item.eventosVinculo.map((evento) => (
-                        <TableRow key={item.eventosVinculo.indexOf(evento)}>
-                          <TableCell component="th" scope="evento">{formatarData(evento.dataEvento)}</TableCell>
-                          <TableCell>{evento.tipoEvento}</TableCell>
-                          <TableCell>{evento.motivoEvento}</TableCell>
-                          <TableCell>{evento.cpfCnpj ? formatCnpjCpf(evento.cpfCnpj) : null}</TableCell>
-                          <TableCell>{evento.nomeProprietario ? evento.nomeProprietario.toUpperCase() : null}</TableCell>
-                          <TableCell>
-                            {evento.numerobanco + ' ' + evento.nomebanco}
-                            <br />Agência: {evento.agencia}
-                            <br />Conta: {parseInt(evento.numeroConta, 10)}
-                            <br />Tipo: {evento.tipoConta}
-                          </TableCell>
-                          <TableCell>{formatarData(evento.dataAberturaConta)}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </Box>
-              </>
-            ) : <></>}
+                    ))}
+                  </TableBody>
+                </Table>
+              </Box>
+            )}
           </TableCell>
         </TableRow>
-      </React.Fragment>
-    )
-  }
-
-
-  function LoadingDialog() {
-    return (
-      <>
-        <Dialog open={loading}>
-          <DialogTitle>
-            Carregando...
-          </DialogTitle>
-          <DialogContent>
-            <DialogContentText id="alert-dialog-slide-description">
-              Por favor, aguarde.
-            </DialogContentText>
-          </DialogContent>
-        </Dialog>
-      </>
+      </Fragment>
     );
-  }
+  };
+
+  const LoadingDialog = () => (
+    <Dialog open={loading}>
+      <DialogTitle>Carregando...</DialogTitle>
+      <DialogContent>
+        <DialogContentText>Por favor, aguarde.</DialogContentText>
+      </DialogContent>
+    </Dialog>
+  );
 
   return (
-    <Box style={{ margin: 10 }}>
-      <Breadcrumbs aria-label="breadcrumb" separator={<NavigateNextIcon fontSize="small" />} sx={{ mb: 2 }}>
+    <Box sx={{ margin: 2 }}>
+      {/* Breadcrumbs Navigation */}
+      <Breadcrumbs
+        aria-label="breadcrumb"
+        separator={<NavigateNextIcon fontSize="small" />}
+        sx={{ mb: 3 }}
+      >
         <Link underline="hover" color="inherit" href="/">
-          <HomeIcon sx={{ mt: 1 }} />
+          <HomeIcon sx={{ mt: 0.5 }} />
         </Link>
-        <Link underline="hover" color="inherit" href="/pix">Solicitações  Pix</Link>
-        <Typography sx={{ color: 'text.primary', fontWeight: 'bold' }}>Nova Solicitação</Typography>
+        <Link underline="hover" color="inherit" href="/pix">
+          Solicitações Pix
+        </Link>
+        <Typography sx={{ color: 'text.primary', fontWeight: 'bold' }}>
+          Nova Solicitação
+        </Typography>
       </Breadcrumbs>
-      <Grid container spacing={2} justifyContent="center" alignItems="center">
-        <Grid item xs={12} md={3}>
-          <FormControl style={{ verticalAlign: 'middle', marginRight: 20 }}>
+
+      <Grid container spacing={3} justifyContent="space-between">
+        {/* Search Type Selection */}
+        <Grid item xs={12} md={2}>
+          <FormControl sx={{ ml: 2 }}>
             <RadioGroup
-              aria-labelledby="demo-controlled-radio-buttons-group"
-              name="controlled-radio-buttons-group"
-              value={value}
-              onChange={handleChange}
-              row
+              name="search-type"
+              value={searchType}
+              onChange={handleSearchTypeChange}
             >
               <FormControlLabel
                 id="cpf_cnpj"
                 value="cpfCnpj"
-                control={<Radio size='small' style={{ margin: 0, alignItems: 'center', padding: 5 }} />}
-                label={<Typography style={{ fontSize: 14 }}>Por CPF/CNPJ</Typography>}
+                control={<Radio size='small' sx={{ p: 0.5 }} />}
+                label={<Typography variant="body2">Por CPF/CNPJ</Typography>}
               />
               <FormControlLabel
                 value="chave"
-                control={<Radio size='small' style={{ margin: 0, alignItems: 'center', padding: 5 }} />}
-                label={<Typography style={{ fontSize: 14 }}>Por Chave PIX</Typography>}
+                control={<Radio size='small' sx={{ p: 0.5 }} />}
+                label={<Typography variant="body2">Por Chave PIX</Typography>}
               />
             </RadioGroup>
           </FormControl>
         </Grid>
-        <Grid container direction='row' item xs={9} md={9} xl={9}>
-          {argsBusca.map((arg, i) => (
-            <React.Fragment key={i}>
-              <Grid container direction='row' item xs={12} md={12} xl={12} alignItems="flex-end">
-                <Grid container item direction="row" justifyContent="flex-start" alignItems="flex-end" xs={1} md={1} xl={1}>
-                  {
-                    (argsBusca.length == 1) ? (
-                      <>
-                        <Grid item>
-                          <IconButton onClick={() => addConsulta()}>
-                            <AddCircleOutlineIcon sx={{ fontSize: 25 }} color="primary" />
-                          </IconButton>
-                        </Grid>
-                      </>
-                    ) : (
-                      ((i) == (argsBusca.length - 1)) ? (
-                        <>
-                          <Grid item style={{ display: 'inline-flex' }}>
-                            <IconButton onClick={() => remConsulta(i)}>
-                              <RemoveCircleOutlineIcon sx={{ fontSize: 25 }} color='error' />
-                            </IconButton>
-                          </Grid>
-                          <Grid item style={{ display: 'inline-flex' }}>
-                            <IconButton onClick={() => addConsulta()}>
-                              <AddCircleOutlineIcon sx={{ fontSize: 25 }} color="primary" />
-                            </IconButton>
-                          </Grid>
-                        </>
-                      ) :
-                        (
-                          <>
-                            <IconButton onClick={() => remConsulta(i)}>
-                              <RemoveCircleOutlineIcon sx={{ fontSize: 25 }} color='error' />
-                            </IconButton>
-                          </>
-                        )
-                    )
-                  }
-                </Grid>
-                <Grid item xs={11} md={11} xl={11} style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-start' }}>
-                  {value === 'cpfCnpj' ?
-                    <TextField
-                      style={{ marginRight: 20 }}
-                      name='cpfCnpj'
-                      value={arg.cpfCnpj}
-                      onChange={e => setFormValues(e, i)}
-                      size="small"
-                      id="standard-basic"
-                      label="CPF/CNPJ"
-                      variant="standard"
-                      placeholder='CPF/CNPJ'
-                    /> : null
-                  }
-                  {value === 'chave' ?
-                    <TextField
-                      style={{ marginRight: 20, width: '200px' }}
-                      name='chave'
-                      value={arg.chave}
-                      onChange={e => setFormValues(e, i)}
-                      size="small"
-                      id="standard-basic"
-                      label="Chave PIX"
-                      variant="standard"
-                      placeholder='Chave PIX'
-                    /> : null
-                  }
-                  <TextField
-                    style={{ width: '200px' }}
-                    size="small"
-                    id="standard-basic"
-                    label="Motivo"
-                    variant="standard"
-                    placeholder='Motivo'
-                    name='motivo'
-                    value={arg.motivo}
-                    onChange={e => setFormValues(e, i)}
-                  />
-                </Grid>
+
+        {/* Search Parameters */}
+        <Grid item xs={12} md={5}>
+          {searchParams.map((param, index) => (
+            <Grid
+              container
+              spacing={2}
+              alignItems="flex-end"
+              key={index}
+              sx={{ mb: 1 }}
+            >
+              <Grid item xs={2}>
+                {searchParams.length === 1 ? (
+                  <IconButton onClick={addSearchParam} color="primary">
+                    <AddCircleOutlineIcon />
+                  </IconButton>
+                ) : (
+                  <Box display="flex">
+                    <IconButton onClick={() => removeSearchParam(index)} color="error">
+                      <RemoveCircleOutlineIcon />
+                    </IconButton>
+                    {index === searchParams.length - 1 && (
+                      <IconButton onClick={addSearchParam} color="primary">
+                        <AddCircleOutlineIcon />
+                      </IconButton>
+                    )}
+                  </Box>
+                )}
               </Grid>
-            </React.Fragment>
-          ))}
-        </Grid>
-        {(argsBusca[0] != initialValues) && (
-          <>
-            <Grid item xs={1}></Grid>
-            <Grid item xs={11}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={deAcordo}
-                    onChange={() => setDeAcordo(!deAcordo)}
+
+              <Grid item xs={10}>
+                <Box display="flex" gap={2}>
+                  {searchType === 'cpfCnpj' ? (
+                    <TextField
+                      name="cpfCnpj"
+                      value={param.cpfCnpj}
+                      onChange={(e) => updateSearchParam(e, index)}
+                      size="small"
+                      label="CPF/CNPJ"
+                      variant="outlined"
+                      placeholder="CPF/CNPJ"
+                      sx={{ flexGrow: 1 }}
+                    />
+                  ) : (
+                    <TextField
+                      name="chave"
+                      value={param.chave}
+                      onChange={(e) => updateSearchParam(e, index)}
+                      size="small"
+                      label="Chave PIX"
+                      variant="outlined"
+                      placeholder="Chave PIX"
+                      sx={{ flexGrow: 1 }}
+                    />
+                  )}
+
+                  <TextField
+                    name="motivo"
+                    value={param.motivo}
+                    onChange={(e) => updateSearchParam(e, index)}
+                    size="small"
+                    label="Motivo"
+                    variant="outlined"
+                    placeholder="Motivo"
+                    sx={{ flexGrow: 1 }}
                   />
-                }
-                label="Declaro que a presente Consulta está sendo realizada mediante CONHECIMENTO E AUTORIZAÇÃO da Autoridade Responsável."
-              />
+                </Box>
+              </Grid>
             </Grid>
-          </>
-        )}
-        <Grid item xs={12} md={12} style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end', marginTop: 20 }} >
-          <Button style={{ marginRight: 10 }} variant="contained" size="small" onClick={buscaPIX} >
+          ))}
+
+          <FormControlLabel
+            control={
+              <Radio
+                checked={deAcordo}
+                onChange={() => setDeAcordo(!deAcordo)}
+                size="small"
+              />
+            }
+            label={
+              <Typography variant="body2" color="text.secondary">
+                Concordo com os termos da consulta e declaro que esta pesquisa está sendo realizada para fins oficiais.
+              </Typography>
+            }
+          />
+        </Grid>
+
+        {/* Action Buttons */}
+        <Grid item xs={12} md={5} sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, alignItems: 'flex-start' }}>
+          <Button
+            variant="contained"
+            size="medium"
+            onClick={handleSearch}
+            color="primary"
+            sx={{
+              minWidth: '100px',
+              height: '40px'
+            }}
+          >
             Pesquisar
           </Button>
-          <Button style={{ marginRight: 10 }} variant="outlined" size="small" onClick={() => setLista([])} >
+
+          <Button
+            variant="outlined"
+            size="medium"
+            onClick={clearResults}
+            sx={{
+              minWidth: '100px',
+              height: '40px'
+            }}
+          >
             Limpar
           </Button>
-          <Button style={{ marginRight: 10 }} disabled={(lista.length == 0) && true} variant="outlined" color='error' size="small" onClick={() => callExportDialog('pdf')} >
-            Exportar PDF
+
+          <Button
+            variant="outlined"
+            color="error"
+            size="medium"
+            onClick={() => openExportDialog('pdf')}
+            disabled={lista.length === 0}
+            sx={{
+              minWidth: '120px',
+              height: '40px'
+            }}
+          >
+            PDF
           </Button>
-          <Button style={{ marginRight: 10 }} disabled={(lista.length == 0) && true} variant="outlined" color='success' size="small" onClick={() => callExportDialog('etc')} >
-            Exportar ...
+
+          <Button
+            variant="outlined"
+            color="success"
+            size="medium"
+            onClick={() => openExportDialog('etc')}
+            disabled={lista.length === 0}
+            sx={{
+              minWidth: '120px',
+              height: '40px'
+            }}
+          >
+            CSV
           </Button>
-          {
-            openDialogRelatorio &&
-            <DialogRelatorioPIX
-              openDialogRelatorio={openDialogRelatorio}
-              setOpenDialogRelatorio={setOpenDialogRelatorio}
-              tipoRelatorio={tipoRelatorio}
-              lista={lista}
-            />
-          }
         </Grid>
-        <Grid item xs={12} md={12}>
-          <TableContainer component={Paper} id='table'>
-            <Table sx={{ minWidth: 650 }} aria-label="collapsible table">
-              {openDialogRequisicoesPIX &&
-                <DialogRequisicoesPIX
-                  openDialogRequisicoesPIX={openDialogRequisicoesPIX}
-                  setOpenDialogRequisicoesPIX={setOpenDialogRequisicoesPIX}
-                  message={message}
-                  statusRequisicoes={statusRequisicoes}
-                />
+
+        {/* Results Table */}
+        <Grid item xs={12}>
+          <TableContainer
+            component={Paper}
+            elevation={2}
+            sx={{
+              borderRadius: '8px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              overflow: 'hidden',
+              '& .MuiTableHead-root': {
+                backgroundColor: '#f8f9fa',
+                '& .MuiTableCell-head': {
+                  fontWeight: 600,
+                  color: '#1a1b1e'
+                }
               }
-              {
-                (lista.length > 0) && (
-                  <>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell />
-                        <TableCell>Chave</TableCell>
-                        <TableCell>Tipo</TableCell>
-                        <TableCell >CPF/CNPJ</TableCell>
-                        <TableCell >Nome</TableCell>
-                        <TableCell >Banco</TableCell>
-                        <TableCell align="right">Status</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {loading && <LoadingDialog />}
-                      {lista.map((item) => (
-                        <Row key={item.chave} item={item} />
-                      ))}
-                    </TableBody>
-                  </>
-                )
-              }
+            }}
+            className={GeistSans.className}
+          >
+            <Table aria-label="collapsible table">
+              {lista.length > 0 && (
+                <>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell />
+                      <TableCell>Chave</TableCell>
+                      <TableCell>Tipo</TableCell>
+                      <TableCell>CPF/CNPJ</TableCell>
+                      <TableCell>Nome</TableCell>
+                      <TableCell>Banco</TableCell>
+                      <TableCell align="right">Status</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {loading && <LoadingDialog />}
+                    {lista.map((item, index) => (
+                      <TableRowItem key={`${item.chave}-${index}`} item={item} />
+                    ))}
+                  </TableBody>
+                </>
+              )}
             </Table>
           </TableContainer>
+
+          {lista.length === 0 && !loading && (
+            <Box
+              sx={{
+                p: 4,
+                textAlign: 'center',
+                backgroundColor: '#f8f9fa',
+                borderRadius: '8px'
+              }}
+              className={GeistSans.className}
+            >
+              <Typography
+                variant="body1"
+                color="text.secondary"
+                sx={{
+                  fontWeight: 500,
+                  letterSpacing: '-0.01em'
+                }}
+              >
+                Nenhum resultado encontrado. Realize uma pesquisa para visualizar os dados.
+              </Typography>
+            </Box>
+          )}
         </Grid>
       </Grid>
-    </Box >
-  )
-}
 
-export default withAuth(ConsultaPix)
+      {/* Dialogs */}
+      {openDialogRequisicoesPIX && (
+        <DialogRequisicoesPIX
+          openDialogRequisicoesPIX={openDialogRequisicoesPIX}
+          setOpenDialogRequisicoesPIX={setOpenDialogRequisicoesPIX}
+          message={message}
+          statusRequisicoes={statusRequisicoes}
+        />
+      )}
+
+      {openDialogRelatorio && (
+        <DialogRelatorioPIX
+          openDialogRelatorio={openDialogRelatorio}
+          setOpenDialogRelatorio={setOpenDialogRelatorio}
+          tipoRelatorio={tipoRelatorio}
+          lista={lista}
+        />
+      )}
+    </Box>
+  );
+};
+
+export default withAuth(ConsultaPix);
