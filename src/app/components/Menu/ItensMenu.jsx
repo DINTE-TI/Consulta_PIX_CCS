@@ -32,13 +32,13 @@ export const MainListItems = () => {
         selected={selectedIndex === 0}
         onClick={(event) => handleListItemClick(event, 0)}
       />
-      <CustomListItem
+      {/* <CustomListItem
         href="/caso/novo"
         text="Novo Caso"
         icon={<AddIcon style={{ color: "#0a243b" }} />}
         selected={selectedIndex === 0}
         onClick={(event) => handleListItemClick(event, 0)}
-      />
+      /> */}
       <CustomListItem
         href="/pix"
         text="PIX"
@@ -46,13 +46,13 @@ export const MainListItems = () => {
         selected={selectedIndex === 0}
         onClick={(event) => handleListItemClick(event, 0)}
       />
-      <CustomListItem
+      {/* <CustomListItem
         href="/ccs"
         text="CCS"
         icon={<AccountBalanceIcon style={{ color: "#0a243b" }} />}
         selected={selectedIndex === 2}
         onClick={(event) => handleListItemClick(event, 2)}
-      />
+      /> */}
     </div >
   )
 };

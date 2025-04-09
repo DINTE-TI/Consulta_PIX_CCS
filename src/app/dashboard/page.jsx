@@ -1,7 +1,7 @@
 'use client'
 
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import AddIcon from '@mui/icons-material/Add';
+// import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+// import AddIcon from '@mui/icons-material/Add';
 import CurrencyExchangeIcon from '@mui/icons-material/CurrencyExchange';
 import { Box } from '@mui/material';
 import axios from 'axios';
@@ -47,7 +47,7 @@ const Dashboard = () => {
 
   return (
     <Box style={{ display: 'flex' }}>
-      <Box width="300px" padding="20px">
+      {/* <Box width="300px" padding="20px">
         <CustomCard
           title="Novo Caso"
           image={"img_card_caso.webp"}
@@ -55,7 +55,7 @@ const Dashboard = () => {
           description="Criação de um novo caso para coleta de dados e informações."
           href="/caso/novo"
         />
-      </Box>
+      </Box> */}
       <Box width="300px" padding="20px">
         <CustomCard
           title="Consulta PIX"
@@ -65,7 +65,7 @@ const Dashboard = () => {
           href="/pix"
         />
       </Box>
-      <Box width="300px" padding="20px">
+      {/* <Box width="300px" padding="20px">
         <CustomCard
           title="Consulta CCS"
           image={"img_card_ccs.png"}
@@ -73,7 +73,7 @@ const Dashboard = () => {
           description="Consulta ao BACEN por CPF ou CNPJ de instituições financeiras vinculadas."
           href="/ccs"
         />
-      </Box>
+      </Box> */}
     </Box>
   );
 }
