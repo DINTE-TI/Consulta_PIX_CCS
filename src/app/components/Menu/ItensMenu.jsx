@@ -1,10 +1,11 @@
 'use client'
 
+import { GeistSans } from 'geist/font/sans';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import CurrencyExchangeIcon from '@mui/icons-material/CurrencyExchange';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import LogoutIcon from '@mui/icons-material/Logout';
-import Person from '@mui/icons-material/Person';
+import PeopleIcon from '@mui/icons-material/People';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
@@ -67,9 +68,9 @@ export const SecondaryListItems = () => {
           <>
             <ListItem button component={Link} href="/user">
               <ListItemIcon>
-                <Person />
+                <PeopleIcon />
               </ListItemIcon>
-              <ListItemText primary="Usuários" />
+              <ListItemText primary="Usuários" sx={{ fontFamily: `${GeistSans.classname}` }} />
             </ListItem>
           </>
         )
@@ -78,7 +79,7 @@ export const SecondaryListItems = () => {
         <ListItemIcon>
           <LogoutIcon />
         </ListItemIcon>
-        <ListItemText primary="Sair" />
+        <ListItemText primary="Sair" sx={{ fontFamily: `${GeistSans.classname}` }} />
       </ListItem>
     </div>
   );
