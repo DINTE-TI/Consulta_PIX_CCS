@@ -1,16 +1,16 @@
 'use client'
 
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
 
 import React from 'react';
 
 // Serviços de Geração de Relatórios em PDF, usando pdfmake
-import RelatorioResumidoPix from "./resumidoPIX";
 import RelatorioDetalhadoPix from "./detalhadoPIX";
+import RelatorioResumidoPix from "./resumidoPIX";
 
 // Componente DIALOG (popup) para Exportação de Arquivos
 export default function DialogRelatorioPIX(props) {
@@ -54,13 +54,29 @@ export default function DialogRelatorioPIX(props) {
         <List sx={{ pt: 0 }}>
           {tipoRelatorio == 'pdf' ?
             <>
-              <ListItem><ListItemButton onClick={() => exportaRelatorio('pdf_resumido', lista)}>Relatório Resumido</ListItemButton></ListItem>
-              <ListItem><ListItemButton onClick={() => exportaRelatorio('pdf_detalhado', lista)}>Relatório Detalhado</ListItemButton></ListItem>
+              <ListItem>
+                <ListItemButton onClick={() => exportaRelatorio('pdf_resumido', lista)}>
+                  Relatório Resumido
+                </ListItemButton>
+              </ListItem>
+              <ListItem>
+                <ListItemButton onClick={() => exportaRelatorio('pdf_detalhado', lista)}>
+                  Relatório Detalhado
+                </ListItemButton>
+              </ListItem>
             </>
             :
             <>
-              <ListItem><ListItemButton onClick={() => exportaRelatorio('csv_completo', lista)}>Arquivo CSV</ListItemButton></ListItem>
-              <ListItem><ListItemButton onClick={() => exportaRelatorio('json_completo', lista)}>Arquivo JSON - Esprites</ListItemButton></ListItem>
+              <ListItem>
+                <ListItemButton onClick={() => exportaRelatorio('csv_completo', lista)}>
+                  Arquivo CSV
+                </ListItemButton>
+              </ListItem>
+              <ListItem>
+                <ListItemButton onClick={() => exportaRelatorio('json_completo', lista)}>
+                  Arquivo JSON - Esprites
+                </ListItemButton>
+              </ListItem>
             </>
           }
 
